@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | LearnEase</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://kit.fontawesome.com/a2d9b6c6f0.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="animated-bg"></div>
+
+  <div class="dashboard">
+    <aside class="sidebar">
+      <h2 class="sidebar-logo"><i class="fas fa-graduation-cap"></i> LearnEase</h2>
+      <ul class="menu">
+        <li><i class="fas fa-home"></i> Home</li>
+        <li><i class="fas fa-book"></i> Courses</li>
+        <li><i class="fas fa-tasks"></i> Assignments</li>
+        <li><i class="fas fa-chart-line"></i> Progress</li>
+        <li><i class="fas fa-comments"></i> Chat</li>
+        <li><i class="fas fa-cog"></i> Settings</li>
+      </ul>
+      <button id="logoutBtn" class="logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </aside>
+
+    <main class="content">
+      <header>
+        <h1 id="welcomeText">Welcome, User!</h1>
+        <div id="clock"></div>
+      </header>
+
+      <section class="main-section">
+        <div class="dashboard-cards">
+          <div class="card"><i class="fas fa-book-open"></i><h3>My Courses</h3><p>Access and continue your lessons easily.</p></div>
+          <div class="card"><i class="fas fa-lightbulb"></i><h3>Learning Tips</h3><p>Smart ways to boost your study habits.</p></div>
+          <div class="card"><i class="fas fa-user-graduate"></i><h3>Achievements</h3><p>Track your milestones and progress.</p></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="fade-overlay"></div>
+  <script src="script.js"></script>
+</body>
+</html>
