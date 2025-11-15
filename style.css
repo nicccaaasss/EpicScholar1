@@ -17,7 +17,7 @@ body {
   position: fixed;
   width: 100%;
   height: 100%;
-  background: linear-gradient(-45deg, #090909, #111111, #1a1a1a, #222222, #2a003e, #1f004d);
+  background: linear-gradient(-90deg,#ff416c, #0072ff);
   background-size: 400% 400%;
   animation: gradientMove 12s ease infinite;
   z-index: -2;
@@ -263,3 +263,4 @@ header {
   opacity: 1;
   pointer-events: auto;
 }
+
