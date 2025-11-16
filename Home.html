@@ -1,46 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard | Epic Scholar</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://kit.fontawesome.com/a2d9b6c6f0.js" crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Epic Scholar - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 </head>
 <body>
-  <div class="animated-bg"></div>
 
-  <div class="dashboard">
-    <aside class="sidebar">
-      <h2 class="sidebar-logo"><i class="fas fa-graduation-cap"></i> Epic Scholar</h2>
-      <ul class="menu">
-        <li><i class="fas fa-home"></i> Home</li>
-        <li><i class="fas fa-book"></i> Courses</li>
-        <li><i class="fas fa-tasks"></i> Assignments</li>
-        <li><i class="fas fa-chart-line"></i> Progress</li>
-        <li><i class="fas fa-comments"></i> Chat</li>
-        <li><i class="fas fa-cog"></i> Settings</li>
-      </ul>
-      <button id="logoutBtn" class="logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
-    </aside>
+    <div class="dashboard-container">
+        
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2 class="logo-text">epic scholar</h2>
+            </div>
+            
+            <ul class="nav-links">
+                <li><a href="#" class="sidebar-link active"><span class="material-icons-outlined">public</span>Public Feed</a></li>
+                <li><a href="#" class="sidebar-link"><span class="material-icons-outlined">book</span>Resources</a></li>
+                <li><a href="#" class="sidebar-link"><span class="material-icons-outlined">assessment</span>Insights</a></li>
+                <li><a href="#" class="sidebar-link"><span class="material-icons-outlined">bookmark_border</span>Saved Posts</a></li>
+            </ul>
 
-    <main class="content">
-      <header>
-        <h1 id="welcomeText">Welcome, User!</h1>
-        <div id="clock"></div>
-      </header>
+            <div class="sidebar-footer">
+                <button id="theme-toggle" class="theme-toggle-btn">
+                    <span class="material-icons-outlined light-icon">light_mode</span>
+                    <span class="material-icons-outlined dark-icon">dark_mode</span>
+                </button>
+                <div class="profile-section">
+                    <img src="https://via.placeholder.com/40" alt="Profile" class="profile-pic-small">
+                    <div class="profile-info">
+                        <strong>Prof. Anya</strong>
+                        <span>View Profile</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
 
-      <section class="main-section">
-        <div class="dashboard-cards">
-          <div class="card"><i class="fas fa-book-open"></i><h3>My Courses</h3><p>Access and continue your lessons easily.</p></div>
-          <div class="card"><i class="fas fa-lightbulb"></i><h3>Learning Tips</h3><p>Smart ways to boost your study habits.</p></div>
-          <div class="card"><i class="fas fa-user-graduate"></i><h3>Achievements</h3><p>Track your milestones and progress.</p></div>
-        </div>
-      </section>
-    </main>
-  </div>
+        <main class="main-content">
+            <header class="main-header">
+                <h1>Welcome, Professor!</h1>
+                <p>What's happening in your courses?</p>
+            </header>
+            
+            <section class="public-feed">
+                <h3>Public Feed</h3>
+                
+                <div class="post-creator card">
+                    <img src="https://via.placeholder.com/40" alt="Profile" class="profile-pic-small">
+                    <input type="text" class="form-input" placeholder="Share an announcement or resource...">
+                </div>
 
-  <div class="fade-overlay"></div>
-  <script src="script.js"></script>
+                <article class="feed-post card">
+                    <div class="post-header">
+                        <img src="https://via.placeholder.com/40" alt="Profile" class="profile-pic-small">
+                        <div class="post-author">
+                            <strong>Dr. Ben Carter</strong>
+                            <span>Shared 2h ago</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <p>Just uploaded the slides from today's lecture on Cellular Respiration. You can find them in the 'Biology 101' resources folder. 🧬</p>
+                        <p>Don't forget, the quiz on this topic is next Friday!</p>
+                    </div>
+                    <div class="post-actions">
+                        <button class="action-btn"><span class="material-icons-outlined">thumb_up_off_alt</span>Like</button>
+                        <button class="action-btn"><span class="material-icons-outlined">chat_bubble_outline</span>Comment</button>
+                        <button class="action-btn"><span class="material-icons-outlined">bookmark_border</span>Save</button>
+                    </div>
+                </article>
+
+                <article class="feed-post card">
+                    <div class="post-header">
+                        <img src="https://via.placeholder.com/40" alt="Profile" class="profile-pic-small">
+                        <div class="post-author">
+                            <strong>Prof. Anya</strong>
+                            <span class="insights-link">View Insights</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <p>New Challenge Posted! 🚀</p>
+                        <p>I've just created the "Calculus Derby" challenge. First three students to complete all derivatives correctly get bonus points. Good luck!</p>
+                    </div>
+                    <div class="post-actions">
+                        <button class="action-btn"><span class="material-icons-outlined">thumb_up_off_alt</span>Like</button>
+                        <button class="action-btn"><span class="material-icons-outlined">chat_bubble_outline</span>Comment</button>
+                        <button class="action-btn"><span class="material-icons-outlined">bookmark_border</span>Save</button>
+                    </div>
+                </article>
+
+            </section>
+        </main>
+
+        <aside class="right-sidebar">
+            
+            <section class="teacher-tools sidebar-widget card">
+                <h4>Teacher Tools</h4>
+                <button class="tool-btn btn-accent1">
+                    <span class="material-icons-outlined">add_circle_outline</span>
+                    Create Session
+                </button>
+                <button class="tool-btn btn-accent2">
+                    <span class="material-icons-outlined">quiz</span>
+                    Create Test/Quiz
+                </button>
+                <button class="tool-btn">
+                    <span class="material-icons-outlined">emoji_events</span>
+                    Create Challenge
+                </button>
+                <button class="tool-btn">
+                    <span class="material-icons-outlined">upload_file</span>
+                    Upload Resource
+                </button>
+            </section>
+            
+            <section class="sidebar-widget card">
+                <h4>Announcements</h4>
+                <div class="widget-item">
+                    <strong>Final Exams</strong>
+                    <p>The final exam schedule has been posted. Please check your portals.</p>
+                </div>
+                <div class="widget-item">
+                    <strong>Library Hours</strong>
+                    <p>The library will have extended hours (until 2 AM) from next week.</p>
+                </div>
+            </section>
+
+            <section class="sidebar-widget card">
+                <h4>Active Challenges</h4>
+                <div class="widget-item">
+                    <strong>Calculus Derby</strong>
+                    <p>Ends in 3 days. 12 participants so far.</p>
+                </div>
+                <div class="widget-item">
+                    <strong>History Trivia</strong>
+                    <p>Ends tomorrow! 45 participants.</p>
+                </div>
+            </section>
+        </aside>
+
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
