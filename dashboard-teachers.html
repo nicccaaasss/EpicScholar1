@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EpicScholar - Teacher Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* Base font */
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+
+        /* --- Liquid "Orb" Background --- */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -2;
+            background-color: #f1f5f9; /* Light mode BG */
+            transition: background-color 0.3s ease;
+        }
+
+        .dark body::before {
+            background-color: #020617; /* Dark mode BG */
+        }
+
+        /* The orbs */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -1;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 114, 255, 0.3), transparent 40%),
+                radial-gradient(circle at 80% 90%, rgba(255, 65, 108, 0.3), transparent 40%);
+            animation: moveOrbs 20s infinite alternate ease-in-out;
+            opacity: 0; /* Hidden in light mode */
+            transition: opacity 0.3s ease;
+        }
+
+        .dark body::after {
+            opacity: 1; /* Visible in dark mode */
+        }
+
+        @keyframes moveOrbs {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                transform: translate(50px, -50px) scale(1.2);
+            }
+        }
+
+        /* --- Glassmorphism Card Style --- */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.4); /* Light mode glass */
+            backdrop-filter: blur(12px) saturate(150%);
+            -webkit-backdrop-filter: blur(12px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .dark .glass-card {
+            background: rgba(30, 41, 59, 0.5); /* Dark mode glass */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-card:hover:not(.no-hover) {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- Sidebar Styles --- */
+        #sidebar {
+            transition: width 0.3s ease, transform 0.5s ease-out, opacity 0.5s ease-out;
+            opacity: 0;
+            transform: translateX(-100%);
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin: 4px 0;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: #475569; /* Light mode text */
+        }
+
+        .dark .sidebar-link {
+            color: #cbd5e1; /* Dark mode text */
+        }
+
+        .sidebar-link:hover, .sidebar-link.active {
+            background: rgba(0, 114, 255, 0.1);
+            color: #0072ff;
+        }
+
+        .dark .sidebar-link:hover, .dark .sidebar-link.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+        }
+        
+        .sidebar-link:active {
+            transform: scale(0.95);
+        }
+
+        .sidebar-link i {
+            width: 24px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .sidebar-link .link-text {
+            opacity: 1;
+            transition: opacity 0.2s ease;
+        }
+
+        /* Hide text on mobile (sm breakpoint) */
+        @media (max-width: 768px) {
+            .sidebar-link .link-text {
+                opacity: 0;
+                width: 0;
+                overflow: hidden;
+            }
+            #sidebar {
+                width: 80px;
+                padding: 16px !important;
+            }
+            #main-content {
+                margin-left: 80px;
+            }
+        }
+        
+        /* --- Gradient Header Styles --- */
+        .special-header {
+            font-size: 1.875rem; /* text-3xl */
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        
+        /* Light Mode: Gradient Text */
+        .special-header {
+            background-image: linear-gradient(135deg, #0072ff 0%, #ff416c 100%);
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        /* Dark Mode: Gradient Background */
+        .dark .special-header {
+            background-image: linear-gradient(135deg, #0072ff 0%, #ff416c 100%);
+            color: white; /* Reset text color */
+            -webkit-background-clip: unset; /* Unset clip */
+            background-clip: unset;
+            padding: 16px 24px;
+            border-radius: 12px;
+        }
+        
+        /* --- Page Load Animations --- */
+        #main-header {
+            transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+        .loaded #sidebar {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .loaded #main-header {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- Content Panel Animations --- */
+        @keyframes panelFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .content-panel {
+            display: none; /* Hidden by default */
+        }
+        .content-panel.active {
+            display: block; /* Shown by JS */
+            animation: panelFadeIn 0.5s ease-out;
+        }
+        
+        /* Staggered list item animation */
+        .list-item {
+            opacity: 0;
+            transform: translateY(10px);
+            animation: panelFadeIn 0.5s ease-out forwards;
+        }
+
+        /* --- Theme Toggle Switch --- */
+        .theme-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            font-size: 14px;
+            color: #ccc;
+            content: "\f185"; /* Sun icon */
+        }
+        input:checked + .slider {
+            background-color: #4a5568;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+            color: #4a5568;
+            content: "\f186"; /* Moon icon */
+        }
+        
+        /* --- Modal Styles --- */
+        @keyframes modalBounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.7);
+            }
+            80% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        #modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            transition: opacity 0.3s ease;
+        }
+        
+        #modal-content {
+            opacity: 0; /* Handled by 'active' class */
+        }
+
+        #modal.active #modal-content {
+            opacity: 1;
+            animation: modalBounceIn 0.4s ease-out;
+        }
+
+        /* Form input styles for modal */
+        .modal-input {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #333;
+        }
+        .dark .modal-input {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f1f5f9;
+        }
+        .modal-input::placeholder {
+            color: #64748b;
+        }
+        .dark .modal-input::placeholder {
+            color: #94a3b8;
+        }
+        /* Style date/time inputs */
+        .modal-input[type="date"], .modal-input[type="time"], .modal-input[type="datetime-local"] {
+            -webkit-appearance: none;
+        }
+        .dark .modal-input[type="date"], .dark .modal-input[type="time"], .dark .modal-input[type="datetime-local"] {
+            color-scheme: dark;
+        }
+
+
+        /* Gradient Button */
+        .btn-gradient {
+            background-image: linear-gradient(135deg, #0072ff 0%, #ff416c 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-gradient:hover {
+            box-shadow: 0 4px 15px rgba(0, 114, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        .btn-gradient:active, .btn-danger:active, .btn-secondary:active, .glass-card[as="button"]:active {
+            transform: scale(0.95);
+        }
+
+        /* Delete/Danger Button */
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-danger:hover {
+            background-color: #dc2626;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+            transform: translateY(-2px);
+        }
+        .btn-delete {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            transition: all 0.2s ease;
+        }
+        .btn-delete:hover {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #dc2626;
+        }
+        
+        /* Secondary Button */
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .dark .btn-secondary {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.6);
+        }
+        .dark .btn-secondary:hover {
+            background: rgba(30, 41, 59, 0.8);
+        }
+        
+        /* --- Toast Notification --- */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+        @keyframes toastSlideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes toastSlideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        .toast {
+            animation: toastSlideIn 0.5s ease-out, toastSlideOut 0.5s ease-in 3.5s forwards;
+            min-width: 250px;
+        }
+/* Light Mode - High Contrast Fix */
+body {
+    background-color: #f9fafb; /* Slightly off-white for body */
+    color: #1f2937; /* Dark slate text for legibility */
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+/* Ensure card backgrounds lift off the page background */
+.glass-card, .bg-primary-light {
+    background-color: #ffffff; /* Pure white for cards */
+    border: 1px solid #e5e7eb; /* Very light border */
+}
+
+/* Dark Mode */
+.dark body {
+    background-color: #0f172a;
+    color: #f1f5f9;
+}
+.dark .glass-card, .dark .bg-primary-light {
+    background-color: #1e293b;
+    border: 1px solid #334155;
+}
+
+/* Secondary/Subdued Text Contrast */
+.text-secondary-dark {
+    color: #6b7280; /* Medium gray */
+}
+.dark .text-secondary-dark {
+    color: #94a3b8; /* Light gray */
+}
+/* Custom Spring-like Easing for luxurious feel */
+.spring-ease {
+    transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); /* Overshoot effect */
+}
+
+/* Apply fluid transitions to most elements */
+.transition-colors, .transition-transform {
+    transition-property: all;
+    transition-duration: 0.35s;
+    @apply .spring-ease; 
+}
+
+/* Glass Card Effect */
+.glass-card {
+    backdrop-filter: blur(12px); 
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05); /* Soft, deep shadow */
+}
+.glass-card:hover {
+    transform: translateY(-4px) scale(1.005); /* Lift and subtle grow */
+}
+
+/* Modal Open Animation (Bubbly Pop) */
+#modal {
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+#modal.active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Page Load Animation */
+.sidebar, #main-content {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease-out, transform 0.6s ease-out;
+}
+
+body.loaded .sidebar {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.1s;
+}
+
+body.loaded #main-content {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.2s;
+}
+
+/* List Item Staggered Animation */
+.list-item {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+    transition-delay: var(--animation-delay, 0s); /* Used by JS */
+}
+
+.list-item.animate-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+    </style>
+</head>
+
+<body class="bg-gray-100 dark:bg-slate-950 text-slate-800 dark:text-slate-200 min-h-screen">
+
+    <div class="flex">
+
+        <!-- ===== Sidebar ===== -->
+        <nav id="sidebar" class="glass-card no-hover w-64 h-screen fixed top-0 left-0 p-6 flex flex-col z-10 m-4">
+            <div class="flex-shrink-0">
+                <h1 class="text-2xl font-bold text-center special-header bg-transparent dark:bg-transparent p-0 dark:p-0">
+                    EpicScholar
+                </h1>
+            </div>
+            
+            <ul class="flex-grow mt-8">
+                <li><a href="#" class="sidebar-link active" data-target="dashboard"><i class="fas fa-home"></i><span class="ml-4 link-text">Dashboard</span></a></li>
+                <li><a href="#" class="sidebar-link" data-target="classes"><i class="fas fa-chalkboard-teacher"></i><span class="ml-4 link-text">My Classes</span></a></li>
+                <li><a href="#" class="sidebar-link" data-target="resources"><i class="fas fa-book-open"></i><span class="ml-4 link-text">Resources</span></a></li>
+                <li><a href="#" class="sidebar-link" data-target="assessments"><i class="fas fa-file-alt"></i><span class="ml-4 link-text">Assessments</span></a></li>
+                <li><a href="#" class="sidebar-link" data-target="sessions"><i class="fas fa-calendar-alt"></i><span class="ml-4 link-text">Sessions</span></a></li>
+                <li><a href="#" class="sidebar-link" data-target="analytics"><i class="fas fa-chart-line"></i><span class="ml-4 link-text">Analytics</span></a></li>
+                <li><a href="#" class="sidebar-link" data-target="messages"><i class="fas fa-comments"></i><span class="ml-4 link-text">Messages</span></a></li>
+            </ul>
+
+            <div class="flex-shrink-0">
+                <!-- Theme Toggle -->
+                <div class="flex items-center justify-between p-2 rounded-lg bg-gray-200 dark:bg-slate-800">
+                    <span class="font-medium text-sm ml-2">Mode</span>
+                    <label class="theme-switch">
+                        <input type="checkbox" id="theme-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <!-- Profile -->
+                <div class="flex items-center mt-4 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-800 transition-colors">
+                    <img src="https://placehold.co/40x40/0072ff/ffffff?text=TD" alt="Teacher" class="w-10 h-10 rounded-full">
+                    <div class="ml-3 hidden md:block">
+                        <p id="profile-name" class="font-semibold text-sm">Prof. T. Davis</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">View Profile</p>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- ===== Main Content ===== -->
+        <main id="main-content" class="flex-1 ml-64 md:ml-[288px] p-4 md:p-8 transition-all duration-300">
+            
+            <!-- Header -->
+            <header id="main-header" class="glass-card no-hover p-4 md:p-6 flex justify-between items-center mb-8">
+                <h2 id="main-header-title" class="text-3xl font-bold text-slate-900 dark:text-white">Dashboard</h2>
+                <div class="flex items-center space-x-4">
+                    <!-- Search Bar -->
+                    <div class="relative hidden md:block">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="search-bar" placeholder="Filter current view..." class="glass-card no-hover pl-10 pr-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 border-none bg-white/50 dark:bg-slate-800/50">
+                    </div>
+                    <button class="glass-card p-3 w-10 h-10 rounded-xl relative text-slate-700 dark:text-slate-300">
+                        <i class="fas fa-bell"></i>
+                        <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">3</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- ===== Content Panels ===== -->
+
+            <!-- == Dashboard Panel == -->
+            <div id="dashboard-content" class="content-panel active">
+                <h3 id="welcome-header" class="special-header mb-6">Welcome back, Professor!</h3>
+                <!-- Stat Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="glass-card p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Students</p>
+                                <p id="stat-total-students" class="text-3xl font-bold">0</p>
+                            </div>
+                            <div class="p-3 rounded-xl bg-blue-500/20 text-blue-500">
+                                <i class="fas fa-users fa-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Classes</p>
+                                <p id="stat-active-classes" class="text-3xl font-bold">0</p>
+                            </div>
+                            <div class="p-3 rounded-xl bg-green-500/20 text-green-500">
+                                <i class="fas fa-chalkboard fa-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Tests to Grade</p>
+                                <p id="stat-tests-to-grade" class="text-3xl font-bold">0</p>
+                            </div>
+                            <div class="p-3 rounded-xl bg-red-500/20 text-red-500">
+                                <i class="fas fa-edit fa-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <h3 class="text-2xl font-semibold mt-10 mb-6">Quick Actions</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <button id="quick-create-test" class="glass-card p-6 flex flex-col items-center justify-center space-y-3 hover:bg-white/60 dark:hover:bg-slate-700/70" as="button">
+                        <i class="fas fa-plus-circle text-4xl text-blue-500"></i>
+                        <span class="font-semibold">Create Test</span>
+                    </button>
+                    <button id="quick-schedule-session" class="glass-card p-6 flex flex-col items-center justify-center space-y-3 hover:bg-white/60 dark:hover:bg-slate-700/70" as="button">
+                        <i class="fas fa-calendar-plus text-4xl text-green-500"></i>
+                        <span class="font-semibold">Schedule Session</span>
+                    </button>
+                    <button id="quick-upload-resource" class="glass-card p-6 flex flex-col items-center justify-center space-y-3 hover:bg-white/60 dark:hover:bg-slate-700/70" as="button">
+                        <i class="fas fa-upload text-4xl text-purple-500"></i>
+                        <span class="font-semibold">Upload Resource</span>
+                    </button>
+                    <button id="quick-send-announcement" class="glass-card p-6 flex flex-col items-center justify-center space-y-3 hover:bg-white/60 dark:hover:bg-slate-700/70" as="button">
+                        <i class="fas fa-bullhorn text-4xl text-yellow-500"></i>
+                        <span class="font-semibold">Send Announcement</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- == My Classes Panel == -->
+            <div id="classes-content" class="content-panel">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="special-header">Class Management</h3>
+                    <button id="create-class-btn" class="glass-card p-3 px-5 font-semibold text-white btn-gradient rounded-lg">
+                        <i class="fas fa-plus mr-2"></i> Create New Class
+                    </button>
+                </div>
+                <div id="class-list-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Class cards will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <!-- == Resources Panel == -->
+            <div id="resources-content" class="content-panel">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="special-header">Content & Resource Hub</h3>
+                    <button id="create-resource-btn" class="glass-card p-3 px-5 font-semibold text-white btn-gradient rounded-lg">
+                        <i class="fas fa-upload mr-2"></i> Upload Resource
+                    </button>
+                </div>
+                <div class="glass-card p-6">
+                    <ul id="resource-list-container" class="space-y-4">
+                        <!-- Resource items will be dynamically inserted here -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- == Assessments Panel == -->
+            <div id="assessments-content" class="content-panel">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="special-header">Test & Quiz Builder</h3>
+                    <button id="create-test-btn" class="glass-card p-3 px-5 font-semibold text-white btn-gradient rounded-lg">
+                        <i class="fas fa-plus mr-2"></i> Create New Test
+                    </button>
+                </div>
+                <div class="glass-card p-6">
+                    <h4 class="text-xl font-bold mb-4">Active Assessments</h4>
+                    <ul id="assessment-list-container" class="space-y-4">
+                        <!-- Assessment items will be dynamically inserted here -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- == Sessions Panel == -->
+            <div id="sessions-content" class="content-panel">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="special-header">Session Scheduler</h3>
+                    <button id="create-session-btn" class="glass-card p-3 px-5 font-semibold text-white btn-gradient rounded-lg">
+                        <i class="fas fa-calendar-plus mr-2"></i> Schedule Session
+                    </button>
+                </div>
+                 <div class="glass-card p-6">
+                    <h4 class="text-xl font-bold mb-4">Upcoming Sessions</h4>
+                    <ul id="session-list-container" class="space-y-4">
+                        <!-- Session items will be dynamically inserted here -->
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- == Analytics Panel == -->
+            <div id="analytics-content" class="content-panel">
+                <h3 class="special-header mb-6">Analytics & Progress</h3>
+                <div class="glass-card p-6">
+                    <p>Mockup Charts - (e.g., Class Average, Test Scores)</p>
+                    <div class="w-full h-64 bg-gray-200/50 dark:bg-slate-800/50 rounded-lg flex items-center justify-center mt-4">
+                        <i class="fas fa-chart-pie text-6xl text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- == Messages Panel == -->
+            <div id="messages-content" class="content-panel">
+                <h3 class="special-header mb-6">Communication & Moderation</h3>
+                <div class="glass-card p-6">
+                    <p>Chat / Discussion Board - Mockup.</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ===== Global Modal ===== -->
+    <div id="modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <!-- Backdrop -->
+        <div id="modal-backdrop" class="fixed inset-0"></div>
+        
+        <!-- Modal Content -->
+        <div id="modal-content" class="glass-card no-hover z-10 w-full max-w-lg p-6">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modal-title" class="text-2xl font-bold">Modal Title</h3>
+                <button id="modal-close-btn" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <!-- Body -->
+            <div id="modal-body" class="mb-6">
+                <!-- Dynamic content goes here -->
+            </div>
+            <!-- Footer -->
+            <div id="modal-footer" class="flex justify-end space-x-4">
+                <!-- Standard footer -->
+                <button id="modal-cancel-btn" class="btn-secondary p-3 px-5 font-semibold rounded-lg">
+                    Cancel
+                </button>
+                <button id="modal-save-btn" class="p-3 px-5 font-semibold text-white btn-gradient rounded-lg">
+                    Save
+                </button>
+                <!-- Confirm footer -->
+                <button id="modal-confirm-btn" class="p-3 px-5 font-semibold text-white btn-danger rounded-lg hidden">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ===== Toast Notification Container ===== -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2">
+        <!-- Toasts will be dynamically added here -->
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // ===================================
+            // MOCK DATA & APP STATE
+            // ===================================
+            let mockUser = {
+                name: "Prof. T. Davis"
+            };
+
+            let db = {
+                classes: [
+                    { id: 1, title: "Biology 101 - Period 3", students: 42, subject: "Biology", grade: "10th Grade", code: "B101-P3" },
+                    { id: 2, title: "Physics Fundamentals - Period 5", students: 38, subject: "Physics", grade: "11th Grade", code: "PHY-P5" }
+                ],
+                assessments: [
+                    { id: 1, title: "Chapter 5 Quiz - Biology 101", due: "Nov 20, 2025", submissions: 25, status: "grading" },
+                    { id: 2, title: "Midterm Exam - Physics", due: "Nov 22, 2025", submissions: 0, status: "scheduled" }
+                ],
+                sessions: [
+                    { id: 1, title: "Biology Midterm Review", type: "Live Session", class: "Biology 101", time: "Nov 18, 2025 @ 3:00 PM" },
+                    { id: 2, title: "Physics Office Hours", type: "Q&A", class: "Physics Fundamentals", time: "Nov 19, 2025 @ 1:00 PM" }
+                ],
+                resources: [
+                    { id: 1, title: "Chapter 5 Slides.pdf", class: "Biology 101", type: "pdf" },
+                    { id: 2, title: "Newton's Laws Video", class: "Physics Fundamentals", type: "video" }
+                ]
+            };
+            
+            let currentActivePanel = 'dashboard'; // For search filtering
+
+            // ===================================
+            // DOM SELECTORS
+            // ===================================
+            const body = document.body;
+            const themeToggle = document.getElementById('theme-toggle');
+            const htmlElement = document.documentElement;
+            const navLinks = document.querySelectorAll('.sidebar-link');
+            const contentPanels = document.querySelectorAll('.content-panel');
+            const mainHeaderTitle = document.getElementById('main-header-title');
+            const searchBar = document.getElementById('search-bar');
+            const toastContainer = document.getElementById('toast-container');
+
+            // Modal elements
+            const modal = document.getElementById('modal');
+            const modalBackdrop = document.getElementById('modal-backdrop');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+            const modalCancelBtn = document.getElementById('modal-cancel-btn');
+            const modalSaveBtn = document.getElementById('modal-save-btn');
+            const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+
+            // Dynamic list containers
+            const classListContainer = document.getElementById('class-list-container');
+            const assessmentListContainer = document.getElementById('assessment-list-container');
+            const sessionListContainer = document.getElementById('session-list-container');
+            const resourceListContainer = document.getElementById('resource-list-container');
+            
+            // Stat containers
+            const welcomeHeader = document.getElementById('welcome-header');
+            const profileName = document.getElementById('profile-name');
+            const statTotalStudents = document.getElementById('stat-total-students');
+            const statActiveClasses = document.getElementById('stat-active-classes');
+            const statTestsToGrade = document.getElementById('stat-tests-to-grade');
+            
+            // "Create" buttons
+            const createClassBtn = document.getElementById('create-class-btn');
+            const createTestBtn = document.getElementById('create-test-btn');
+            const createSessionBtn = document.getElementById('create-session-btn');
+            const createResourceBtn = document.getElementById('create-resource-btn');
+
+            // Quick action buttons
+            const quickCreateTest = document.getElementById('quick-create-test');
+            const quickScheduleSession = document.getElementById('quick-schedule-session');
+            const quickUploadResource = document.getElementById('quick-upload-resource');
+            const quickSendAnnouncement = document.getElementById('quick-send-announcement');
+
+            // To store the current "save" action
+            let currentSaveAction = null;
+            let currentConfirmAction = null;
+
+
+            // ===================================
+            // RENDER FUNCTIONS (UPDATE UI)
+            // ===================================
+            
+            function applyStaggeredAnimation(container) {
+                const items = container.querySelectorAll('.list-item');
+                items.forEach((item, index) => {
+                    item.style.animationDelay = `${index * 50}ms`;
+                });
+            }
+
+            function renderAll(searchTerm = '') {
+                renderClasses(searchTerm);
+                renderAssessments(searchTerm);
+                renderSessions(searchTerm);
+                renderResources(searchTerm);
+                updateStats();
+                welcomeHeader.textContent = `Welcome back, ${mockUser.name}!`;
+                profileName.textContent = mockUser.name;
+            }
+
+            function updateStats() {
+                statActiveClasses.textContent = db.classes.length;
+                statTotalStudents.textContent = db.classes.reduce((sum, c) => sum + c.students, 0);
+                statTestsToGrade.textContent = db.assessments.filter(a => a.status === 'grading').length;
+            }
+
+            function renderClasses(searchTerm = '') {
+                classListContainer.innerHTML = ''; // Clear list
+                const filtered = db.classes.filter(c => c.title.toLowerCase().includes(searchTerm));
+                
+                if (filtered.length === 0) {
+                    classListContainer.innerHTML = `<p class="text-gray-500 dark:text-gray-400 col-span-full text-center">No classes found.</p>`;
+                    return;
+                }
+                filtered.forEach(c => {
+                    const classCard = `
+                        <div class="glass-card p-6 list-item">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="text-xl font-bold mb-2">${c.title}</h4>
+                                    <p class="text-gray-500 dark:text-gray-400 mb-4">${c.students} Students</p>
+                                </div>
+                                <button class="btn-delete p-2 rounded-lg text-sm" data-id="${c.id}" data-type="class">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            <div class="flex items-center space-x-2 mb-4">
+                                <span class="text-sm font-medium py-1 px-3 rounded-full bg-blue-200 text-blue-800">${c.subject}</span>
+                                <span class="text-sm font-medium py-1 px-3 rounded-full bg-green-200 text-green-800">${c.grade}</span>
+                            </div>
+                            <p class="mb-4">Class Code: <strong class="font-mono p-1 bg-gray-200 dark:bg-slate-800 rounded">${c.code}</strong></p>
+                            <button class="w-full text-center p-3 font-semibold rounded-lg bg-blue-500/20 text-blue-600 dark:text-blue-300 hover:bg-blue-500/30">Manage Class</button>
+                        </div>
+                    `;
+                    classListContainer.innerHTML += classCard;
+                });
+                applyStaggeredAnimation(classListContainer);
+            }
+
+            function renderAssessments(searchTerm = '') {
+                assessmentListContainer.innerHTML = '';
+                const filtered = db.assessments.filter(a => a.title.toLowerCase().includes(searchTerm));
+                
+                if (filtered.length === 0) {
+                    assessmentListContainer.innerHTML = `<p class="text-gray-500 dark:text-gray-400 text-center">No assessments found.</p>`;
+                    return;
+                }
+                filtered.forEach(a => {
+                    const assessmentItem = `
+                        <li class="flex justify-between items-center p-4 rounded-lg bg-gray-200/50 dark:bg-slate-800/50 list-item">
+                            <div>
+                                <p class="font-semibold">${a.title}</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Due: ${a.due} | ${a.submissions} Submissions</p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="p-2 px-4 rounded-lg ${a.status === 'grading' ? 'bg-green-500/20 text-green-600 dark:text-green-300' : 'bg-gray-500/20 text-gray-600 dark:text-gray-300'} font-medium">
+                                    ${a.status === 'grading' ? 'Grade' : 'View'}
+                                </button>
+                                <button class="btn-delete p-2 px-3 rounded-lg text-sm" data-id="${a.id}" data-type="assessment">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </li>
+                    `;
+                    assessmentListContainer.innerHTML += assessmentItem;
+                });
+                applyStaggeredAnimation(assessmentListContainer);
+            }
+
+            function renderSessions(searchTerm = '') {
+                sessionListContainer.innerHTML = '';
+                const filtered = db.sessions.filter(s => s.title.toLowerCase().includes(searchTerm));
+                
+                if (filtered.length === 0) {
+                    sessionListContainer.innerHTML = `<p class="text-gray-500 dark:text-gray-400 text-center">No sessions found.</p>`;
+                    return;
+                }
+                filtered.forEach(s => {
+                    const sessionItem = `
+                        <li class="flex justify-between items-center p-4 rounded-lg bg-gray-200/50 dark:bg-slate-800/50 list-item">
+                            <div>
+                                <p class="font-semibold">${s.title} <span class="text-xs font-medium py-0.5 px-2 rounded-full bg-purple-200 text-purple-800 ml-2">${s.type}</span></p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">For: ${s.class} | ${s.time}</p>
+                            </div>
+                             <button class="btn-delete p-2 px-3 rounded-lg text-sm" data-id="${s.id}" data-type="session">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </li>
+                    `;
+                    sessionListContainer.innerHTML += sessionItem;
+                });
+                applyStaggeredAnimation(sessionListContainer);
+            }
+
+            function renderResources(searchTerm = '') {
+                resourceListContainer.innerHTML = '';
+                const filtered = db.resources.filter(r => r.title.toLowerCase().includes(searchTerm));
+
+                 if (filtered.length === 0) {
+                    resourceListContainer.innerHTML = `<p class="text-gray-500 dark:text-gray-400 text-center">No resources found.</p>`;
+                    return;
+                }
+                filtered.forEach(r => {
+                    const icon = r.type === 'pdf' ? 'fa-file-pdf' : (r.type === 'video' ? 'fa-video' : 'fa-link');
+                    const color = r.type === 'pdf' ? 'text-red-500' : (r.type === 'video' ? 'text-blue-500' : 'text-yellow-500');
+                    const resourceItem = `
+                        <li class="flex justify-between items-center p-4 rounded-lg bg-gray-200/50 dark:bg-slate-800/50 list-item">
+                            <div class="flex items-center">
+                                <i class="fas ${icon} text-2xl ${color} mr-4"></i>
+                                <div>
+                                    <p class="font-semibold">${r.title}</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Class: ${r.class}</p>
+                                </div>
+                            </div>
+                            <button class="btn-delete p-2 px-3 rounded-lg text-sm" data-id="${r.id}" data-type="resource">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </li>
+                    `;
+                    resourceListContainer.innerHTML += resourceItem;
+                });
+                applyStaggeredAnimation(resourceListContainer);
+            }
+
+            // ===================================
+            // MODAL LOGIC
+            // ===================================
+
+            function openModal(title, bodyHtml, saveCallback) {
+                modalTitle.textContent = title;
+                modalBody.innerHTML = bodyHtml;
+                
+                // Set up for standard save/cancel
+                modalSaveBtn.classList.remove('hidden');
+                modalCancelBtn.textContent = 'Cancel';
+                modalConfirmBtn.classList.add('hidden');
+
+                modal.classList.remove('hidden');
+                setTimeout(() => modal.classList.add('active'), 10);
+
+                if (currentSaveAction) modalSaveBtn.removeEventListener('click', currentSaveAction);
+                currentSaveAction = saveCallback;
+                modalSaveBtn.addEventListener('click', currentSaveAction);
+            }
+
+            function openConfirmModal(title, message, confirmCallback) {
+                modalTitle.textContent = title;
+                modalBody.innerHTML = `<p>${message}</p>`;
+
+                // Set up for confirm/cancel
+                modalSaveBtn.classList.add('hidden');
+                modalCancelBtn.textContent = 'Cancel';
+                modalConfirmBtn.classList.remove('hidden');
+
+                modal.classList.remove('hidden');
+                setTimeout(() => modal.classList.add('active'), 10);
+                
+                if (currentConfirmAction) modalConfirmBtn.removeEventListener('click', currentConfirmAction);
+                currentConfirmAction = () => {
+                    confirmCallback();
+                    closeModal();
+                };
+                modalConfirmBtn.addEventListener('click', currentConfirmAction);
+            }
+
+            function closeModal() {
+                modal.classList.remove('active');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    modalBody.innerHTML = '';
+                    if (currentSaveAction) modalSaveBtn.removeEventListener('click', currentSaveAction);
+                    if (currentConfirmAction) modalConfirmBtn.removeEventListener('click', currentConfirmAction);
+                    currentSaveAction = null;
+                    currentConfirmAction = null;
+                }, 300);
+            }
+
+            modalBackdrop.addEventListener('click', closeModal);
+            modalCloseBtn.addEventListener('click', closeModal);
+            modalCancelBtn.addEventListener('click', closeModal);
+
+            // ===================================
+            // TOAST NOTIFICATION
+            // ===================================
+            function showToast(message, type = 'success') {
+                const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+                const color = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+
+                const toast = document.createElement('div');
+                toast.className = `toast glass-card no-hover flex items-center p-4 rounded-lg shadow-lg ${color} text-white`;
+                toast.innerHTML = `
+                    <i class="fas ${icon} text-xl mr-3"></i>
+                    <span class="font-semibold">${message}</span>
+                `;
+                toastContainer.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.remove();
+                }, 4000); // 0.5s in, 3.5s visible, 0.5s out
+            }
+
+            // ===================================
+            // "CREATE" MODAL FORMS
+            // ===================================
+
+            const classSelectOptions = () => db.classes.map(c => `<option value="${c.title}">${c.title}</option>`).join('');
+
+            const createClassForm = `
+                <div class="space-y-4">
+                    <label class="block">
+                        <span class="font-medium">Class Title</span>
+                        <input id="new-class-title" type="text" placeholder="e.g., Chemistry 101" class="modal-input block w-full mt-1 p-2 rounded-lg">
+                    </label>
+                    <label class="block">
+                        <span class="font-medium">Subject</span>
+                        <input id="new-class-subject" type="text" placeholder="e.g., Chemistry" class="modal-input block w-full mt-1 p-2 rounded-lg">
+                    </label>
+                    <label class="block">
+                        <span class="font-medium">Grade Level</span>
+                        <input id="new-class-grade" type="text" placeholder="e.g., 11th Grade" class="modal-input block w-full mt-1 p-2 rounded-lg">
+                    </label>
+                </div>
+            `;
+            
+            const createTestForm = `
+                <div class="space-y-4">
+                    <label class="block">
+                        <span class="font-medium">Test Title</span>
+                        <input id="new-test-title" type="text" placeholder="e.g., Chapter 6 Quiz" class="modal-input block w-full mt-1 p-2 rounded-lg">
+                    </label>
+                    <label class="block">
+                        <span class="font-medium">Assign to Class</span>
+                        <select id="new-test-class" class="modal-input block w-full mt-1 p-2 rounded-lg">
+                            ${classSelectOptions()}
+                        </select>
+                    </label>
+                    <label class="block">
+                        <span class="font-medium">Due Date</span>
+                        <input id="new-test-due" type="date" class="modal-input block w-full mt-1 p-2 rounded-lg">
+                    </label>
+                </div>
+            `;
+
+            const createSessionForm = `
+                <div class="space-y-4">
+                    <label class="block">
+                        <span class="font-medium">Session Title</span>
+                        <input id="new-session-title" type="text" placeholder="e.g., Midterm Review" class="modal-input block w-full mt-1 p-2 rounded-lg">
+                    </label>
+                    <label class="block">
+                        <span class="font-medium">Session Type</span>
+                        <select id="new-session-type" class="modal-input block w-full mt-1 p-2 rounded-lg">
+                            <option value="Live Session">Live Session</option>
+                            <option value="Q&A">Q&A</option>
+                            <option value="Study Group">Study Group</option>
+                        </select>
+                    </label>
+                    <label class="block">
+                        <span class="font-medium">For Class</span>
+                        <select id="new-session-class" class="modal-input block w-full mt-1 p-2 rounded-lg">
+                            ${classSelectOptions()}
+                        </select>
+                    </label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <label class="block">
+                            <span class="font-medium">Date</span>
+                            <input id="new-session-date" type="date" class="modal-input block w-full mt-1 p-2 rounded-lg">
+                        </label>
+                        <label class="block">
+                            <span class="font-medium">Time</span>
+                            <input id="new-session-time" type="time" class="modal-input block w-full mt-1 p-2 rounded-lg">
+                        </label>
+                    </div>
+                </div>
+            `;
+            
+            const createResourceForm = `
+                <div class="space-y-4">
+                    <label class="block">
+                        <span class="font-medium">Resource Title</span>
+                        <input id="new-resource-title" type="text" placeholder="e.g., Unit 1 Slides.pdf" class="modal-input block w-full mt-1 p-2 rounded-lg">
+                    </label>
+                    <label class="block">
+                        <span class="font-medium">Resource Type</span>
+                        <select id="new-resource-type" class="modal-input block w-full mt-1 p-2 rounded-lg">
+                            <option value="pdf">PDF Document</option>
+                            <option value="video">Video Link</option>
+                            <option value="link">Website Link</option>
+                        </select>
+                    </label>
+                    <label class="block">
+                        <span class="font-medium">Assign to Class</span>
+                        <select id="new-resource-class" class="modal-input block w-full mt-1 p-2 rounded-lg">
+                            ${classSelectOptions()}
+                        </select>
+                    </label>
+                </div>
+            `;
+
+            const createAnnouncementForm = `
+                <div class="space-y-4">
+                    <label class="block">
+                        <span class="font-medium">Announcement</span>
+                        <textarea id="new-announcement-text" rows="5" class="modal-input block w-full mt-1 p-2 rounded-lg" placeholder="Type your message here..."></textarea>
+                    </label>
+                    <label class="block">
+                        <span class="font-medium">Send to Class</span>
+                        <select id="new-announcement-class" class="modal-input block w-full mt-1 p-2 rounded-lg">
+                            <option value="all">All Classes</option>
+                            ${classSelectOptions()}
+                        </select>
+                    </label>
+                </div>
+            `;
+
+            // ===================================
+            // "ADD" (SAVE) FUNCTIONS
+            // ===================================
+
+            function addClass() {
+                const title = document.getElementById('new-class-title').value;
+                const subject = document.getElementById('new-class-subject').value;
+                const grade = document.getElementById('new-class-grade').value;
+                
+                if (!title || !subject || !grade) return; // Simple validation
+
+                const newClass = {
+                    id: Date.now(),
+                    title: title,
+                    students: Math.floor(Math.random() * 20) + 20, // Random students
+                    subject: subject,
+                    grade: grade,
+                    code: subject.slice(0, 3).toUpperCase() + '-' + Date.now().toString().slice(-3)
+                };
+                db.classes.push(newClass);
+                renderClasses();
+                updateStats();
+                closeModal();
+                showToast('Class created successfully!');
+            }
+
+            function addTest() {
+                const title = document.getElementById('new-test-title').value;
+                const classTitle = document.getElementById('new-test-class').value;
+                const dueDate = document.getElementById('new-test-due').value;
+
+                if (!title || !classTitle || !dueDate) return;
+
+                const newTest = {
+                    id: Date.now(),
+                    title: `${title} - ${classTitle}`,
+                    due: new Date(dueDate).toLocaleDateString("en-US", { month: 'short', day: 'numeric', year: 'numeric' }),
+                    submissions: 0,
+                    status: 'scheduled'
+                };
+                db.assessments.push(newTest);
+                renderAssessments();
+                updateStats();
+                closeModal();
+                showToast('Test created successfully!');
+            }
+
+            function addSession() {
+                const title = document.getElementById('new-session-title').value;
+                const type = document.getElementById('new-session-type').value;
+                const classTitle = document.getElementById('new-session-class').value;
+                const date = document.getElementById('new-session-date').value;
+                const time = document.getElementById('new-session-time').value;
+                
+                if (!title || !type || !classTitle || !date || !time) return;
+
+                const dateTime = new Date(`${date}T${time}`);
+                const newSession = {
+                    id: Date.now(),
+                    title: title,
+                    type: type,
+                    class: classTitle,
+                    time: dateTime.toLocaleString("en-US", { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })
+                };
+                db.sessions.push(newSession);
+                renderSessions();
+                closeModal();
+                showToast('Session scheduled successfully!');
+            }
+            
+            function addResource() {
+                const title = document.getElementById('new-resource-title').value;
+                const type = document.getElementById('new-resource-type').value;
+                const classTitle = document.getElementById('new-resource-class').value;
+                
+                if (!title || !type || !classTitle) return;
+
+                const newResource = {
+                    id: Date.now(),
+                    title: title,
+                    type: type,
+                    class: classTitle,
+                };
+                db.resources.push(newResource);
+                renderResources();
+                closeModal();
+                showToast('Resource uploaded successfully!');
+            }
+
+            function sendAnnouncement() {
+                const text = document.getElementById('new-announcement-text').value;
+                const classTitle = document.getElementById('new-announcement-class').value;
+                if (!text) return;
+                
+                console.log(`Sending announcement to ${classTitle}: ${text}`); // Mock send
+                closeModal();
+                showToast('Announcement sent!');
+            }
+
+
+            // ===================================
+            // "DELETE" FUNCTION (EVENT DELEGATION)
+            // ===================================
+            
+            function handleDeleteClick(e) {
+                const deleteBtn = e.target.closest('.btn-delete');
+                if (!deleteBtn) return;
+
+                const id = parseInt(deleteBtn.dataset.id);
+                const type = deleteBtn.dataset.type;
+
+                openConfirmModal('Are you sure?', `This will permanently delete the ${type}. This action cannot be undone.`, () => {
+                    switch (type) {
+                        case 'class':
+                            db.classes = db.classes.filter(c => c.id !== id);
+                            renderClasses();
+                            break;
+                        case 'assessment':
+                            db.assessments = db.assessments.filter(a => a.id !== id);
+                            renderAssessments();
+                            break;
+                        case 'session':
+                            db.sessions = db.sessions.filter(s => s.id !== id);
+                            renderSessions();
+                            break;
+                        case 'resource':
+                            db.resources = db.resources.filter(r => r.id !== id);
+                            renderResources();
+                            break;
+                    }
+                    updateStats();
+                    showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} deleted.`, 'success');
+                });
+            }
+            
+            document.getElementById('main-content').addEventListener('click', handleDeleteClick);
+
+            // ===================================
+            // SEARCH FUNCTIONALITY
+            // ===================================
+            searchBar.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                
+                // Re-render the *current* panel with the filter
+                switch (currentActivePanel) {
+                    case 'classes':
+                        renderClasses(searchTerm);
+                        break;
+                    case 'assessments':
+                        renderAssessments(searchTerm);
+                        break;
+                    case 'sessions':
+                        renderSessions(searchTerm);
+                        break;
+                    case 'resources':
+                        renderResources(searchTerm);
+                        break;
+                }
+            });
+
+
+            // ===================================
+            // EVENT LISTENERS
+            // ===================================
+
+            // --- Theme Toggle ---
+            if (localStorage.getItem('theme') === 'dark') {
+                htmlElement.classList.add('dark');
+                themeToggle.checked = true;
+            }
+            themeToggle.addEventListener('change', () => {
+                htmlElement.classList.toggle('dark');
+                localStorage.setItem('theme', themeToggle.checked ? 'dark' : 'light');
+            });
+
+            // --- Sidebar Navigation ---
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('data-target');
+                    currentActivePanel = targetId; // Update global state
+                    
+                    const targetPanel = document.getElementById(targetId + '-content');
+                    const targetTitle = link.querySelector('.link-text').textContent;
+
+                    navLinks.forEach(navLink => navLink.classList.remove('active'));
+                    contentPanels.forEach(panel => panel.classList.remove('active'));
+
+                    link.classList.add('active');
+                    if (targetPanel) {
+                        targetPanel.classList.add('active');
+                    }
+                    mainHeaderTitle.textContent = targetTitle;
+                    
+                    // Clear search bar and re-render when switching tabs
+                    searchBar.value = '';
+                    renderAll(); 
+                });
+            });
+
+            // --- Modal "Create" Button Listeners ---
+            createClassBtn.addEventListener('click', () => openModal('Create New Class', createClassForm, addClass));
+            createTestBtn.addEventListener('click', () => openModal('Create New Test', createTestForm, addTest));
+            createSessionBtn.addEventListener('click', () => openModal('Schedule New Session', createSessionForm, addSession));
+            createResourceBtn.addEventListener('click', () => openModal('Upload New Resource', createResourceForm, addResource));
+
+            // --- Quick Action Button Listeners ---
+            quickCreateTest.addEventListener('click', () => openModal('Create New Test', createTestForm, addTest));
+            quickScheduleSession.addEventListener('click', () => openModal('Schedule New Session', createSessionForm, addSession));
+            quickUploadResource.addEventListener('click', () => openModal('Upload New Resource', createResourceForm, addResource));
+            quickSendAnnouncement.addEventListener('click', () => openModal('Send Announcement', createAnnouncementForm, sendAnnouncement));
+
+            // ===================================
+            // INITIALIZATION
+            // ===================================
+            renderAll(); // Render all dynamic content on page load
+            document.querySelector('.sidebar-link[data-target="dashboard"]').click(); // Set default tab
+            
+            // Trigger page load animations
+            setTimeout(() => {
+                body.classList.add('loaded');
+            }, 100); // 100ms delay to ensure styles are applied
+        });
+    </script>
+</body>
+</html>
