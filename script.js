@@ -1,50 +1,31 @@
-const validUsername = "demoUser";
-const validPassword = "demoPass";
+// Dark/Light Mode Toggle
+const themeToggle = document.getElementById('theme-toggle');
+const htmlTag = document.documentElement;
 
-const loginForm = document.getElementById("loginForm");
-if (loginForm) {
-  loginForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const username = document.getElementById("username").value.trim();
-    const password = document.getElementById("password").value.trim();
-
-    if (username === validUsername && password === validPassword) {
-      const overlay = document.querySelector(".fade-overlay");
-      overlay.classList.add("fade-active");
-      setTimeout(() => {
-        localStorage.setItem("username", username);
-        window.location.href = "dashboard.html";
-      }, 800);
+// On Toggle Click
+themeToggle.addEventListener('click', () => {
+    if (htmlTag.getAttribute('data-theme') === 'dark') {
+        htmlTag.setAttribute('data-theme', 'light');
+        localStorage.setItem('epicScholarTheme', 'light');
     } else {
-      alert("Incorrect username or password");
+        htmlTag.setAttribute('data-theme', 'dark');
+        localStorage.setItem('epicScholarTheme', 'dark');
     }
-  });
-}
+    // Optional: Add header droplet wave effect on toggle
+    document.querySelector('header').classList.add('header-anime');
+    setTimeout(() => { document.querySelector('header').classList.remove('header-anime'); }, 950);
+});
 
-if (window.location.pathname.includes("dashboard.html")) {
-  const user = localStorage.getItem("username");
-  const welcomeText = document.getElementById("welcomeText");
-  if (user && welcomeText) {
-    welcomeText.textContent = `Welcome, ${user}!`;
-  }
+// Persistent theme storage
+window.addEventListener('DOMContentLoaded', () => {
+    const storedTheme = localStorage.getItem('epicScholarTheme');
+    if (storedTheme) {
+        htmlTag.setAttribute('data-theme', storedTheme);
+    }
+});
 
-  const clock = document.getElementById("clock");
-  if (clock) {
-    setInterval(() => {
-      const now = new Date();
-      clock.textContent = now.toLocaleTimeString();
-    }, 1000);
-  }
-
-  const logoutBtn = document.getElementById("logoutBtn");
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-      const overlay = document.querySelector(".fade-overlay");
-      overlay.classList.add("fade-active");
-      setTimeout(() => {
-        localStorage.removeItem("username");
-        window.location.href = "login.html";
-      }, 800);
-    });
-  }
-}
+// Optional: Animate important header on theme switch
+const header = document.querySelector('header');
+header.addEventListener('animationend', () => {
+    header.classList.remove('header-anime');
+});
