@@ -1,147 +1,403 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Epic Scholar - Dashboard</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <title>EpicScholar Liquid Glass SPA</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .mini-card .mini-content {
+    display: none;
+}
+
+.mini-card:hover .mini-content,
+.mini-card.active .mini-content {
+    display: block;
+}
+.mini-icon {
+    background: linear-gradient(135deg, #0072ff, #ff416c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.mini-icon svg path {
+    fill: url(#gradient-fill);
+}
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #0072ff, #ff416c);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.05);
+}
+.feed-post video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain !important;
+    background: #000; /* avoids white gaps */
+}
+/* default */
+#searchBar {
+    border: 2px solid #3a3a3a;
+    padding: 8px 12px;
+    border-radius: 8px;
+}
+
+/* active */
+#searchBar:focus {
+    outline: none;
+    border: 2px solid transparent;
+    background-image:
+        linear-gradient(#151515, #151515),
+        linear-gradient(135deg, #0072ff, #ff416c);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+}
+
+/* COMMENTS: user vs others */
+.comment {
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  padding:12px;
+  margin-bottom:10px;
+  border-radius:12px;
+  background: rgba(255,255,255,0.03);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  overflow:hidden;
+}
+.comment .cavatar{
+  width:40px;height:40px;min-width:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-weight:700;color:#fff;background:rgba(0,0,0,0.2);
+}
+.comment .ctext{flex:1;display:flex;flex-direction:column;gap:6px;}
+.comment .ctext .meta{font-size:13px;opacity:.85}
+.comment .ctext .body{font-size:14px;color:var(--text-color);line-height:1.45}
+
+/* other people's comments = muted grey box */
+.comment:not(.mine){
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.03);
+  color: rgba(233,238,248,0.95);
+}
+
+/* your own comments = gradient bubble */
+.comment.mine{
+  background: linear-gradient(135deg, rgba(0,114,255,0.16), rgba(255,65,108,0.08));
+  border: 1px solid rgba(255,255,255,0.06);
+  color: #fff;
+  align-self: flex-end;
+}
+
+/* small timestamp for comments */
+.comment .ctext .time { font-size:12px; opacity:0.65; }
+
+/* SHARE MENU: show/hide class */
+.share-menu {
+  /* base inline styles in createPostEl remain; just define show state */
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  opacity: 0; pointer-events: none; transform: translateY(8px);
+}
+.share-menu.show {
+  opacity: 1; pointer-events: auto; transform: translateY(0);
+}
+
+/* keep share-menu visually distinct on dark theme */
+.share-menu button { background:none; border:none; padding:8px 10px; text-align:left; cursor:pointer; color:var(--text-color); border-radius:8px; }
+.share-menu button:hover { background: rgba(255,255,255,0.02); }
+
+/* 1) Hide mini-card content until hovered */
+.mini-card-content { display: none; }
+.mini-card:hover .mini-card-content,
+.mini-card.active .mini-card-content { display: block; }
+
+/* 2) Gradient icon for mini-cards using data-icon attribute */
+.mini-card {
+  position: relative;
+  padding: 12px;
+  cursor: pointer;
+}
+.mini-card::before{
+  content: attr(data-icon);
+  display: inline-block;
+  font-size: 22px;
+  width: 42px; height: 42px;
+  line-height: 42px;
+  text-align: center;
+  border-radius: 10px;
+  vertical-align: middle;
+  background: linear-gradient(135deg,#0072ff,#ff416c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Optionally position the pseudo-icon on the left of the card content */
+.mini-card .mini-card-content { margin-left: 6px; }
+
+/* 3) Global gradient scrollbar thumb for the page and key scrollable containers */
+:root{
+  --scroll-thumb: linear-gradient(135deg,#0072ff,#ff416c);
+}
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+*::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
+  border-radius: 10px;
+  border: 2px solid rgba(0,0,0,0.12);
+}
+.feed-viewport::-webkit-scrollbar-thumb,
+.panel-full::-webkit-scrollbar-thumb,
+.commentModalList::-webkit-scrollbar-thumb { background: var(--scroll-thumb); }
+
+/* 4) Ensure video always fully visible within media placeholder */
+.media video,
+.media .video-container video,
+.feed-post video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important; /* ensure whole video visible, no cropping */
+  background: #000;
+}
+
+/* 5) Search bar: dark grey border default, gradient border on focus */
+#searchBar{
+  border: 2px solid #3a3a3a;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: 10px 16px;
+  border-radius: 28px;
+  transition: box-shadow .18s, border .18s, background .18s;
+}
+#searchBar:focus{
+  outline: none;
+  border-color: transparent;
+  box-shadow: 0 0 0 3px rgba(0,114,255,0.08);
+  background-image: linear-gradient(#151515,#151515), linear-gradient(135deg,#0072ff,#ff416c);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+/* 6) Share menu visible state handled by .show */
+.share-menu { opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity .16s, transform .16s; }
+.share-menu.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+    </style>
 </head>
 <body>
 
-    <div class="dashboard-container">
+    <!-- LIQUID GLASS ANIMATIVE BACKGROUND -->
+    <div id="liquid-glass-container">
+        <div class="glass-blob blob-1"></div>
+        <div class="glass-blob blob-2"></div>
+        <div class="glass-blob blob-3"></div>
+    </div>
+
+    <!-- Header (Glass) - Fixed Top Layer -->
+    <div class="header glass-element fixed-top-layer">
+        <h1>EpicScholar</h1>
+        <!-- Theme Toggle (Glass) - Fixed Top Layer -->
+        <div id="themeToggleContainer">
+            <label class="toggle-switch glass-element" aria-label="Toggle Dark/Light Theme">
+                <input type="checkbox" id="themeToggle">
+                <span class="slider"></span>
+                <span class="label-dark">🌙</span>
+                <span class="label-light">☀️</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Left Sidebar (Glass) - Fixed Left Layer -->
+    <div class="sidebar glass-element fixed-top-layer">
+        <!-- Main Navigation Items -->
+        <div class="nav-wrap" id="navWrap">
+            <div class="nav-underline" id="navUnderline"></div>
+            <!-- Added data-icon for mobile view -->
+            <div class="nav-item active" data-view="home" data-icon="🏠">🏠 Home </div>
+            <div class="nav-item" data-view="messages" data-icon="✉️">✉️ Messages</div>
+            <div class="nav-item" data-view="self-study" data-icon="📖">📖 Self-Study</div>
+            <div class="nav-item" data-view="edubot" data-icon="🤖">🤖 EduBot</div>
+            <div class="nav-item" data-view="mini-games" data-icon="🎮">🎮 Mini-Games</div>
+            <div class="nav-item" data-view="profile" data-icon="👤">👤 Profile</div>
+        </div>
         
-        <nav class="sidebar">
-            <div class="sidebar-header">
-                <h2 class="logo-text">epic scholar</h2>
-            </div>
-            
-            <ul class="nav-links">
-                <li><a href="#" class="sidebar-link active"><span class="material-icons-outlined">public</span>Public Feed</a></li>
-                <li><a href="#" class="sidebar-link"><span class="material-icons-outlined">book</span>Resources</a></li>
-                <li><a href="#" class="sidebar-link"><span class="material-icons-outlined">assessment</span>Insights</a></li>
-                <li><a href="#" class="sidebar-link"><span class="material-icons-outlined">bookmark_border</span>Saved Posts</a></li>
-            </ul>
+        <!-- Settings (Located at the end) -->
+        <div class="settings-wrap">
+            <div class="nav-item" data-view="settings" data-icon="⚙️">⚙️ Settings</div>
+        </div>
+    </div>
 
-            <div class="sidebar-footer">
-                <button id="theme-toggle" class="theme-toggle-btn">
-                    <span class="material-icons-outlined light-icon">light_mode</span>
-                    <span class="material-icons-outlined dark-icon">dark_mode</span>
-                </button>
-                <div class="profile-section">
-                    <img src="https://via.placeholder.com/40" alt="Profile" class="profile-pic-small">
-                    <div class="profile-info">
-                        <strong>Prof. Anya</strong>
-                        <span>View Profile</span>
-                    </div>
-                </div>
-            </div>
-        </nav>
-
-        <main class="main-content">
-            <header class="main-header">
-                <h1>Welcome, Professor!</h1>
-                <p>What's happening in your courses?</p>
-            </header>
-            
-            <section class="public-feed">
-                <h3>Public Feed</h3>
+    <!-- MAIN CENTRAL CONTENT CONTAINER -->
+    <div id="main-content-wrapper">
+        
+        <!-- ============================================= -->
+        <!-- 1. HOME FEED VIEW (Scrollable) -->
+        <!-- ============================================= -->
+        <div id="home-view" class="view-section active">
+            <div id="feed-container">
                 
-                <div class="post-creator card">
-                    <img src="https://via.placeholder.com/40" alt="Profile" class="profile-pic-small">
-                    <input type="text" class="form-input" placeholder="Share an announcement or resource...">
+                <!-- Search & Refresh Container (Glass) -->
+                <div id="searchContainer" class="glass-element" style="padding: 15px; border-radius: 18px; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; background: rgba(50, 50, 50, 0.4);">
+                    <input type="search" id="searchBar" placeholder="Search posts or users..." style="flex-grow: 1; padding: 15px 25px; border-radius: 30px;; background-color: var(--bg-color); color: var(--text-color); font-size: 17px; transition: border-color 0.3s, box-shadow 0.3s;">
+                    <button id="refreshBtn" style="background: var(--primary-gradient); color: white; padding: 15px 20px; border-radius: 30px; border: none; cursor: pointer; font-size: 18px; font-weight: bold; box-shadow: var(--shadow-deep); transition: transform 0.2s, opacity 0.2s;">🔄</button>
                 </div>
 
-                <article class="feed-post card">
-                    <div class="post-header">
-                        <img src="https://via.placeholder.com/40" alt="Profile" class="profile-pic-small">
-                        <div class="post-author">
-                            <strong>Dr. Ben Carter</strong>
-                            <span>Shared 2h ago</span>
-                        </div>
-                    </div>
-                    <div class="post-content">
-                        <p>Just uploaded the slides from today's lecture on Cellular Respiration. You can find them in the 'Biology 101' resources folder. 🧬</p>
-                        <p>Don't forget, the quiz on this topic is next Friday!</p>
-                    </div>
-                    <div class="post-actions">
-                        <button class="action-btn"><span class="material-icons-outlined">thumb_up_off_alt</span>Like</button>
-                        <button class="action-btn"><span class="material-icons-outlined">chat_bubble_outline</span>Comment</button>
-                        <button class="action-btn"><span class="material-icons-outlined">bookmark_border</span>Save</button>
-                    </div>
-                </article>
-
-                <article class="feed-post card">
-                    <div class="post-header">
-                        <img src="https://via.placeholder.com/40" alt="Profile" class="profile-pic-small">
-                        <div class="post-author">
-                            <strong>Prof. Anya</strong>
-                            <span class="insights-link">View Insights</span>
-                        </div>
-                    </div>
-                    <div class="post-content">
-                        <p>New Challenge Posted! 🚀</p>
-                        <p>I've just created the "Calculus Derby" challenge. First three students to complete all derivatives correctly get bonus points. Good luck!</p>
-                    </div>
-                    <div class="post-actions">
-                        <button class="action-btn"><span class="material-icons-outlined">thumb_up_off_alt</span>Like</button>
-                        <button class="action-btn"><span class="material-icons-outlined">chat_bubble_outline</span>Comment</button>
-                        <button class="action-btn"><span class="material-icons-outlined">bookmark_border</span>Save</button>
-                    </div>
-                </article>
-
-            </section>
-        </main>
-
-        <aside class="right-sidebar">
-            
-            <section class="teacher-tools sidebar-widget card">
-                <h4>Teacher Tools</h4>
-                <button class="tool-btn btn-accent1">
-                    <span class="material-icons-outlined">add_circle_outline</span>
-                    Create Session
-                </button>
-                <button class="tool-btn btn-accent2">
-                    <span class="material-icons-outlined">quiz</span>
-                    Create Test/Quiz
-                </button>
-                <button class="tool-btn">
-                    <span class="material-icons-outlined">emoji_events</span>
-                    Create Challenge
-                </button>
-                <button class="tool-btn">
-                    <span class="material-icons-outlined">upload_file</span>
-                    Upload Resource
-                </button>
-            </section>
-            
-            <section class="sidebar-widget card">
-                <h4>Announcements</h4>
-                <div class="widget-item">
-                    <strong>Final Exams</strong>
-                    <p>The final exam schedule has been posted. Please check your portals.</p>
+                <!-- Feed Box -->
+                <div id="feed" style="min-height: 500px; transition: opacity 0.3s;">
+                    <!-- Posts will be rendered here by JS -->
                 </div>
-                <div class="widget-item">
-                    <strong>Library Hours</strong>
-                    <p>The library will have extended hours (until 2 AM) from next week.</p>
-                </div>
-            </section>
 
-            <section class="sidebar-widget card">
-                <h4>Active Challenges</h4>
-                <div class="widget-item">
-                    <strong>Calculus Derby</strong>
-                    <p>Ends in 3 days. 12 participants so far.</p>
+            </div>
+        </div>
+
+        <!-- ============================================= -->
+        <!-- 2. OTHER FIXED VIEWS (Non-Scrollable Main Area) -->
+        <!-- ============================================= -->
+        
+        <div id="messages-view" class="view-section">
+            <div class="other-view-content glass-element">
+                <h2>✉️ Messages Center</h2>
+                <p>Real-time chat and direct messages with classmates and teachers.</p>
+                <p style="font-size: 18px; opacity: 0.7;">(This area remains fixed and centered. Only the Home Feed is scrollable.)</p>
+                <button style="margin-top: 20px; padding: 12px 25px; background: var(--secondary-color); color: white; border: none; border-radius: 12px; cursor: pointer; transition: transform 0.2s;">Start New Conversation</button>
+            </div>
+        </div>
+
+        <div id="self-study-view" class="view-section">
+            <div class="other-view-content glass-element">
+                <h2>📖 Self-Study Tools</h2>
+                <p>Personalized learning modules, flashcards, and progress tracking.</p>
+                <p style="font-size: 18px; opacity: 0.7;">(Content is loaded here, but the main window remains non-scrolling.)</p>
+                <button style="margin-top: 20px; padding: 12px 25px; background: var(--primary-color); color: white; border: none; border-radius: 12px; cursor: pointer; transition: transform 0.2s;">View Learning Path</button>
+            </div>
+        </div>
+        
+        <div id="edubot-view" class="view-section">
+            <div class="other-view-content glass-element">
+                <h2>🤖 EduBot Assistant</h2>
+                <p>AI-powered tutoring and homework help available 24/7.</p>
+                <p style="font-size: 18px; opacity: 0.7;">(A complex chat interface would be contained here, maximizing the fixed space.)</p>
+            </div>
+        </div>
+        
+        <div id="mini-games-view" class="view-section">
+            <div class="other-view-content glass-element">
+                <h2>🎮 Mini-Games Hub</h2>
+                <p>Engage with educational games to boost retention.</p>
+                <div style="display: flex; gap: 20px; margin-top: 20px;">
+                    <button style="padding: 10px 20px; background: #FFC300; color: #1c1e21; border: none; border-radius: 10px; font-weight: bold; transition: transform 0.2s;">Start Math Game</button>
+                    <button style="padding: 10px 20px; background: #DAF7A6; color: #1c1e21; border: none; border-radius: 10px; font-weight: bold; transition: transform 0.2s;">Start History Quiz</button>
                 </div>
-                <div class="widget-item">
-                    <strong>History Trivia</strong>
-                    <p>Ends tomorrow! 45 participants.</p>
+            </div>
+        </div>
+        
+        <div id="profile-view" class="view-section">
+            <div class="other-view-content glass-element">
+                <h2>👤 Profile & Badges</h2>
+                <p>View achievements, stats, and customize your avatar.</p>
+                <div style="font-size: 16px; margin-top: 20px;">
+                    <p>User ID: <code id="displayUserId">Loading...</code></p>
+                    <p>Total Badges: 🏅 14</p>
                 </div>
-            </section>
-        </aside>
+            </div>
+        </div>
+        
+        <div id="settings-view" class="view-section">
+            <div class="other-view-content glass-element">
+                <h2>⚙️ Settings & Privacy</h2>
+                <p>Manage account, notifications, and accessibility options.</p>
+                <p style="font-size: 18px; opacity: 0.7;">(Full settings form would be implemented here.)</p>
+            </div>
+        </div>
 
     </div>
 
+    <!-- Right-side panels wrapper (Fixed) -->
+    <div id="right-panel-wrapper">
+        
+        <!-- Add Epic Card -->
+        <div id="addEpicCard" class="mini-card" data-icon="➕" data-label="New Epic">
+            <div class="mini-card-content glass-element">
+                <h3 style="margin-top: 0; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Add New Epic</h3>
+                <input type="file" id="epicFileInput" accept="image/*,video/*" style="display:none;">
+                <label for="epicFileInput" id="fileChooseLabel" style="width: 100%; text-align: center; padding: 10px; border-radius: 8px; border: 1px dashed var(--primary-color); cursor: pointer; background: var(--secondary-glass); transition: all 0.2s;position: relative;right: 15px;display: flex; justify-content: center; align-items: center;">Select file</label>
+                <div id="epicPreview" style="flex-grow: 1; border: 2px dashed var(--card-glass-border); border-radius: 8px; margin: 10px 0; width: 100%; display: flex; justify-content: center; align-items: center; font-size: 14px; opacity: 0.8;position: relative;right: 10px;">Preview</div>
+                <textarea id="epicCaption" placeholder="What's this about?" rows="2" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 10px; border: 1px solid var(--card-glass-border); background-color: var(--bg-color); color: var(--text-color); resize: none;position: relative;right: 15px;"></textarea>
+                <div class="upload-buttons" style="display: flex; gap: 10px; justify-content: flex-end; width: 100%;">
+                    <button id="cancelUpload" class="panel-btn" style="background: var(--secondary-glass); color: var(--text-color); border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; transition: transform 0.2s;">Cancel</button>
+                    <button id="confirmUpload" class="panel-btn" style="background: var(--primary-gradient); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; transition: transform 0.2s;">Post</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reminder Card -->
+        <div id="reminderCard" class="mini-card" data-icon="⏰" data-label="Reminders">
+            <div class="mini-card-content glass-element">
+                <h3 style="margin-top: 0;">⏰ Reminders</h3>
+                <ul id="remindersList" style="list-style: none; padding: 0; margin: 10px 0; width: 100%;"></ul>
+                <button id="closeReminder" class="panel-btn" style="margin-top: auto; align-self: flex-end; background: var(--primary-color); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; transition: transform 0.2s;">Done</button>
+            </div>
+        </div>
+
+        <!-- Notifications Card -->
+        <div id="notifsCard" class="mini-card" data-icon="🔔" data-label="Notifications">
+            <div class="mini-card-content glass-element">
+                <h3 style="margin-top: 0;">🔔 Notifications</h3>
+                <ul id="notifList" style="list-style: none; padding: 0; margin: 10px 0; width: 100%;"></ul>
+                <button id="closeNotifs" class="panel-btn" style="margin-top: auto; align-self: flex-end; background: var(--secondary-color); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; transition: transform 0.2s;">Clear All</button>
+            </div>
+        </div>
+        
+        <!-- Schedule Card -->
+        <div id="scheduleCard" class="mini-card" data-icon="🗓️" data-label="Schedule">
+            <div class="mini-card-content glass-element">
+                <h3 style="margin-top: 0;">🗓️ Schedule</h3>
+                <ul id="schedulesList" style="list-style: none; padding: 0; margin: 10px 0; width: 100%;"></ul>
+                <button id="closeSchedule" class="panel-btn" style="margin-top: auto; align-self: flex-end; background: var(--primary-color); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; transition: transform 0.2s;">View Calendar</button>
+            </div>
+        </div>
+        
+        <!-- Tests/Quizzes Card -->
+        <div id="testsCard" class="mini-card" data-icon="📒" data-label="Tests">
+            <div class="mini-card-content glass-element">
+                <h3 style="margin-top: 0;">📒 Tests & Quizzes</h3>
+                <ul id="testsList" style="list-style: none; padding: 0; margin: 10px 0; width: 100%;"></ul>
+                <button id="closeTests" class="panel-btn" style="margin-top: auto; align-self: flex-end; background: var(--secondary-color); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; transition: transform 0.2s;">Start Test</button>
+            </div>
+        </div>
+        
+    </div>
+    <defs>
+  <linearGradient id="gradient-fill" x1="0" x2="1" y1="0" y2="1">
+    <stop offset="0%" stop-color="#0072ff"/>
+    <stop offset="100%" stop-color="#ff416c"/>
+  </linearGradient>
+</defs>
+
+    <!-- Comment Modal (Slide-Up) -->
+    <div id="commentModal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-top: 0; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 24px;">Comments</h3>
+            <div id="commentModalList" style="flex-grow: 1; overflow-y: auto; margin-bottom: 20px; padding-right: 10px; scroll-behavior: smooth;"></div>
+            <div class="modal-input-area" style="display: flex; gap: 10px; padding-top: 15px; border-top: 1px solid var(--card-glass-border);">
+                <textarea id="commentModalTextarea" placeholder="Write a comment..." rows="1" style="flex-grow: 1; padding: 12px 20px; border-radius: 25px; border: 1px solid var(--primary-color); background-color: var(--bg-color); color: var(--text-color); resize: none; transition: border-color 0.3s; font-size: 16px;"></textarea>
+                <button id="commentModalPostBtn" class="commentModalPostBtn" style="background: var(--primary-gradient); color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: 700; transition: transform 0.2s;">Post</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Feedback Message Container (Toast) -->
+    <div id="feedback-message"></div>
+
+    <!-- 
+        ============================================================
+        2. JAVASCRIPT LOGIC AND FUNCTIONALITY (800+ LINES)
+        ============================================================
+    -->
     <script src="script.js"></script>
 </body>
 </html>
