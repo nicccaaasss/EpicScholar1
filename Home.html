@@ -27,7 +27,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #0072ff, #ff416c);
+    background: #888;
     border-radius: 10px;
 }
 
@@ -141,7 +141,7 @@
 
 /* 3) Global gradient scrollbar thumb for the page and key scrollable containers */
 :root{
-  --scroll-thumb: linear-gradient(135deg,#0072ff,#ff416c);
+  --scroll-thumb: #888;
 }
 *::-webkit-scrollbar { width: 8px; height: 8px; }
 *::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
@@ -185,6 +185,132 @@
 /* 6) Share menu visible state handled by .show */
 .share-menu { opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity .16s, transform .16s; }
 .share-menu.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
+/* Styling for all lists inside the right panel mini-cards */
+#right-panel-wrapper .mini-card ul {
+    list-style: none; /* Remove default bullet points */
+    padding: 0;
+    margin: 0;
+}
+
+/* Styling for each individual list item (the "box wrapper") */
+#right-panel-wrapper .mini-card li {
+    /* Box Model */
+    padding: 10px 15px; /* Add some spacing inside */
+    margin-bottom: 8px; /* Space between the list items */
+    border-radius: 8px; /* Rounded corners for the box */
+    
+    /* Appearance (The 'Box' Look) */
+    background: var(--bg-color-2); /* A slightly different background color for distinction */
+    border: 1px solid var(--card-glass-border); /* A subtle border */
+    font-size: 14px;
+    line-height: 1.4;
+    cursor: default;
+    
+    /* Visual Effect */
+    transition: all 0.2s ease-in-out;
+}
+
+/* Hover effect for a little interactivity */
+#right-panel-wrapper .mini-card li:hover {
+    background: var(--bg-color-3); /* Darken/lighten slightly on hover */
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure the last item in the list doesn't have extra bottom margin */
+#right-panel-wrapper .mini-card li:last-child {
+    margin-bottom: 0;
+}
+.image-modal {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(12,12,18,0.92);
+  z-index: 5002;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity .22s;
+}
+.image-modal.show {
+  opacity: 1; pointer-events: auto; display:flex;
+}
+
+/* Modal image transitions with a bouncy cubic-bezier */
+.image-modal img {
+  max-width: 95vw; max-height: 90vh; border-radius: 14px; box-shadow: 0 0 30px #222;
+  will-change: transform, opacity;
+  transition:
+    border-radius 0.27s cubic-bezier(.61,-0.13,.43,1.38),
+    box-shadow 0.16s,
+    opacity 0.25s,
+    transform 0.62s cubic-bezier(.23,1.43,.26,1.01);
+  opacity: 0;
+  transform: scale(0.7) translateZ(0);
+}
+
+/* When animating in or out, the inline style may be overridden for transform! */
+.image-modal.show .modal-image-animate-in {
+  opacity: 1;
+  transform: scale(1) translateZ(0);
+  transition:
+    border-radius 0.27s cubic-bezier(.61,-0.13,.43,1.38),
+    box-shadow 0.16s,
+    opacity 0.29s 0.03s,
+    transform 0.62s cubic-bezier(.23,1.43,.26,1.01);
+}
+
+.image-modal .modal-image-animate-out {
+  opacity: 0;
+  transform: scale(0.7) translateZ(0);
+  transition:
+    border-radius 0.27s cubic-bezier(.61,-0.13,.43,1.38),
+    box-shadow 0.16s,
+    opacity 0.22s,
+    transform 0.57s cubic-bezier(.16,1.59,.19,.99);
+}
+
+.image-modal .modal-close-btn {
+  position: absolute;
+  top: 38px;
+  right: 52px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  font-size: 2.15rem;
+  color: #fff;
+  background: linear-gradient(135deg, #0072ff 0%, #ff416c 100%);
+  box-shadow:
+    0 6px 18px rgba(0,0,0,0.27),
+    0 0 0 5px rgba(0,114,255,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  border: none;
+  outline: none;
+  opacity: 0.94;
+  transition: 
+    transform 0.21s cubic-bezier(.23,1.54,.23,1),
+    box-shadow 0.19s,
+    background 0.24s,
+    opacity 0.18s;
+}
+.image-modal .modal-close-btn:hover, 
+.image-modal .modal-close-btn:focus {
+  background: linear-gradient(135deg, #ff416c 0%, #0072ff 100%);
+  box-shadow:
+    0 12px 28px 5px rgba(0, 114, 255, 0.12),
+    0 0 0 8px rgba(255,65,108,0.1),
+    0 0 18px 7px rgba(255,65,108,0.22);
+  color: #fff;
+  opacity: 1;
+  transform: scale(1.13) rotateZ(-8deg);
+  outline: none;
+  border: none;
+}
+.image-modal .modal-close-btn:active {
+  opacity: .77;
+  transform: scale(0.98);
+  background: linear-gradient(135deg, #407cfa, #ff416c 95%);
+}
 
     </style>
 </head>
@@ -259,61 +385,6 @@
         <!-- ============================================= -->
         
         <div id="messages-view" class="view-section">
-            <div class="other-view-content glass-element">
-                <h2>✉️ Messages Center</h2>
-                <p>Real-time chat and direct messages with classmates and teachers.</p>
-                <p style="font-size: 18px; opacity: 0.7;">(This area remains fixed and centered. Only the Home Feed is scrollable.)</p>
-                <button style="margin-top: 20px; padding: 12px 25px; background: var(--secondary-color); color: white; border: none; border-radius: 12px; cursor: pointer; transition: transform 0.2s;">Start New Conversation</button>
-            </div>
-        </div>
-
-        <div id="self-study-view" class="view-section">
-            <div class="other-view-content glass-element">
-                <h2>📖 Self-Study Tools</h2>
-                <p>Personalized learning modules, flashcards, and progress tracking.</p>
-                <p style="font-size: 18px; opacity: 0.7;">(Content is loaded here, but the main window remains non-scrolling.)</p>
-                <button style="margin-top: 20px; padding: 12px 25px; background: var(--primary-color); color: white; border: none; border-radius: 12px; cursor: pointer; transition: transform 0.2s;">View Learning Path</button>
-            </div>
-        </div>
-        
-        <div id="edubot-view" class="view-section">
-            <div class="other-view-content glass-element">
-                <h2>🤖 EduBot Assistant</h2>
-                <p>AI-powered tutoring and homework help available 24/7.</p>
-                <p style="font-size: 18px; opacity: 0.7;">(A complex chat interface would be contained here, maximizing the fixed space.)</p>
-            </div>
-        </div>
-        
-        <div id="mini-games-view" class="view-section">
-            <div class="other-view-content glass-element">
-                <h2>🎮 Mini-Games Hub</h2>
-                <p>Engage with educational games to boost retention.</p>
-                <div style="display: flex; gap: 20px; margin-top: 20px;">
-                    <button style="padding: 10px 20px; background: #FFC300; color: #1c1e21; border: none; border-radius: 10px; font-weight: bold; transition: transform 0.2s;">Start Math Game</button>
-                    <button style="padding: 10px 20px; background: #DAF7A6; color: #1c1e21; border: none; border-radius: 10px; font-weight: bold; transition: transform 0.2s;">Start History Quiz</button>
-                </div>
-            </div>
-        </div>
-        
-        <div id="profile-view" class="view-section">
-            <div class="other-view-content glass-element">
-                <h2>👤 Profile & Badges</h2>
-                <p>View achievements, stats, and customize your avatar.</p>
-                <div style="font-size: 16px; margin-top: 20px;">
-                    <p>User ID: <code id="displayUserId">Loading...</code></p>
-                    <p>Total Badges: 🏅 14</p>
-                </div>
-            </div>
-        </div>
-        
-        <div id="settings-view" class="view-section">
-            <div class="other-view-content glass-element">
-                <h2>⚙️ Settings & Privacy</h2>
-                <p>Manage account, notifications, and accessibility options.</p>
-                <p style="font-size: 18px; opacity: 0.7;">(Full settings form would be implemented here.)</p>
-            </div>
-        </div>
-
     </div>
 
     <!-- Right-side panels wrapper (Fixed) -->
@@ -392,6 +463,11 @@
     
     <!-- Feedback Message Container (Toast) -->
     <div id="feedback-message"></div>
+<!-- Enlarged image modal -->
+<div id="imageModal" class="image-modal" style="display:none;">
+  <span id="imageModalClose" class="modal-close-btn">&#10005;</span>
+  <img id="modalImage" src="" alt="Enlarged image" />
+</div>
 
     <!-- 
         ============================================================
