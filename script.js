@@ -268,6 +268,130 @@ function createPostEl(post){
             else if (container.msRequestFullscreen) container.msRequestFullscreen();
         });
     }
+// Enlarged image modal logic for feed images
+const imageModal = document.getElementById('imageModal');
+const modalImage = document.getElementById('modalImage');
+const imageModalClose = document.getElementById('imageModalClose');
+
+// When ANY image inside .feed (or .post) is clicked, show the modal
+document.getElementById('feed').addEventListener('click', (e) => {
+  // Use .media img or .carousel-img, adapt selector as needed
+  const img = e.target.closest('img');
+  if (img && img.src) {
+    modalImage.src = img.src;
+    imageModal.classList.add('show');
+    imageModal.style.display = 'flex';
+  }
+});
+
+// Close when clicking the close button
+imageModalClose.addEventListener('click', () => {
+  imageModal.classList.remove('show');
+  setTimeout(() => imageModal.style.display = 'none', 150);
+});
+
+// Close when clicking outside the image area
+imageModal.addEventListener('click', (e) => {
+  if (e.target === imageModal) {
+    imageModal.classList.remove('show');
+    setTimeout(() => imageModal.style.display = 'none', 150);
+  }
+});
+
+// Optionally: support Escape key to close modal
+document.addEventListener('keydown', (e) => {
+  if (e.key === "Escape" && imageModal.classList.contains('show')) {
+    imageModal.classList.remove('show');
+    setTimeout(() => imageModal.style.display = 'none', 150);
+  }
+});
+// --- Bouncy (from-image) modal animation for enlarged images ---
+
+let lastOriginRect = null; // store where the image "came from" for close animation
+
+feed.addEventListener('click', (e) => {
+  const img = e.target.closest('img');
+  if (img && img.src) {
+    // Get position and size of the clicked image
+    const imgRect = img.getBoundingClientRect();
+    lastOriginRect = imgRect; // save for closing animation
+
+    // Set modal and modal image to match source initially
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImage');
+    modalImg.src = img.src;
+
+    // Hide modal visually so layout doesn't jump, then set it up
+    modal.style.display = "flex";
+    // Allow pre-animation layout flush
+    setTimeout(() => {
+      // Set image position, size to match the small image (absolute, fixed)
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const centerX = (vw / 2) - (imgRect.left + imgRect.width / 2);
+      const centerY = (vh / 2) - (imgRect.top + imgRect.height / 2);
+      const scaleX = imgRect.width / modalImg.offsetWidth;
+      const scaleY = imgRect.height / modalImg.offsetHeight;
+      // Set modal image transform from source position/size
+      modalImg.style.transformOrigin = "center center";
+      modalImg.style.transform =
+        `translate(${centerX}px, ${centerY}px) scale(${scaleX}, ${scaleY})`;
+      modalImg.style.opacity = '0.8';
+      modalImg.classList.remove("modal-image-animate-in", "modal-image-animate-out");
+
+      // force DOM update, then trigger the animation to center/scale
+      void modalImg.offsetWidth;
+      modal.classList.add("show");
+      // Animate to center fullscreen with bounce
+      setTimeout(() => {
+        modalImg.classList.add("modal-image-animate-in");
+        modalImg.style.transform = "";
+        modalImg.style.opacity = "1";
+      }, 10);
+    }, 6);
+  }
+});
+
+// Close modal with bounce-back to image
+function closeImageModalBounce() {
+  const modal = document.getElementById('imageModal');
+  const modalImg = document.getElementById('modalImage');
+  if (!lastOriginRect) {
+    // fallback: just fade out
+    modal.classList.remove("show");
+    setTimeout(() => modal.style.display = "none", 160);
+    return;
+  }
+  // Bounce-back transition to source image location/size
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const centerX = (vw/2) - (lastOriginRect.left + lastOriginRect.width / 2);
+  const centerY = (vh/2) - (lastOriginRect.top + lastOriginRect.height / 2);
+  const scaleX = lastOriginRect.width / modalImg.offsetWidth;
+  const scaleY = lastOriginRect.height / modalImg.offsetHeight;
+  modalImg.classList.remove('modal-image-animate-in');
+  modalImg.classList.add('modal-image-animate-out');
+  modalImg.style.transform =
+    `translate(${centerX}px, ${centerY}px) scale(${scaleX}, ${scaleY})`;
+  modalImg.style.opacity = "0.8";
+  // After animation ends, hide the modal
+  setTimeout(() => {
+    modal.classList.remove("show");
+    modal.style.display = "none";
+    modalImg.classList.remove('modal-image-animate-out');
+    modalImg.style.transform = "";
+    lastOriginRect = null;
+  }, 580); // match the closing cubic-bezier
+}
+
+// Use this for all closes
+document.getElementById('imageModalClose').addEventListener('click', closeImageModalBounce);
+document.getElementById('imageModal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('imageModal'))
+    closeImageModalBounce();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === "Escape" && document.getElementById('imageModal').classList.contains('show'))
+    closeImageModalBounce();
+});
 
     /* -------------------------------------------
        Reaction logic (fixed counting and animations)
@@ -630,11 +754,14 @@ function updateUnderline(el){
 }
 
 allNavItems.forEach(it=>{
-    it.addEventListener('mouseenter', ()=>{ /* no underline movement */ });
-    it.addEventListener('click', ()=>{
-        switchView(it.dataset.view);
-        showFeedback(`Mapped to ${it.dataset.view.replace('-', ' ')}! 🚀`);
-    });
+    it.addEventListener('mouseenter', ()=>{ /* no underline movement */ });
+    it.addEventListener('click', ()=>{
+        // Get the view name from the data-view attribute (e.g., "home", "messages")
+        const viewName = it.dataset.view;
+        
+        // Navigate the browser to the new .html page
+        window.location.href = `${viewName}.html`;
+    });
 });
 
 navWrap.addEventListener('mouseleave', () => { /* no op - underline removed */ });
