@@ -14,6 +14,10 @@
     <button class="icon-btn" onclick="toggleMusic()" id="music-btn" title="Toggle Music">
       <span class="material-icons">music_note</span>
     </button>
+    <!-- Guide Button -->
+    <button class="icon-btn" onclick="showGuide()" title="How to Play">
+      <span class="material-icons">help_outline</span>
+    </button>
     <button class="mode-toggle icon-btn" onclick="toggleMode()" title="Switch Theme">
       <span class="material-icons">brightness_6</span>
     </button>
@@ -108,6 +112,32 @@
       <h2 class="final-message" id="finalMessage">You Won!</h2>
       <p id="final-score">5 - 3</p>
       <button class="btn primary-btn" onclick="location.reload()">Play Again</button>
+    </div>
+  </div>
+
+  <!-- Guide Modal -->
+  <div class="modal-overlay" id="guide-modal">
+    <div class="modal-card">
+      <h2>📖 How to Play</h2>
+      <div class="guide-steps">
+        <div class="step">
+          <span class="step-icon">🎯</span>
+          <p><strong>Objective:</strong> Reach the <strong>Target Score</strong> before the Bot does.</p>
+        </div>
+        <div class="step">
+          <span class="step-icon">⚔️</span>
+          <p><strong>Rules:</strong> Rock crushes Scissors, Scissors cuts Paper, Paper covers Rock.</p>
+        </div>
+        <div class="step">
+          <span class="step-icon">⏱️</span>
+          <p><strong>Timer Mode:</strong> You have <strong>10 seconds</strong> to make a move, or a random one is chosen!</p>
+        </div>
+        <div class="step">
+          <span class="step-icon">🧠</span>
+          <p><strong>Difficulty:</strong> Hard mode learns your patterns. Watch out!</p>
+        </div>
+      </div>
+      <button class="btn primary-btn" onclick="closeGuide()">Got it!</button>
     </div>
   </div>
 

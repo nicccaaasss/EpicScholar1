@@ -14,7 +14,7 @@ const state = {
 };
 
 const choices = ['rock', 'paper', 'scissors'];
-const emojis = { rock: '✊', paper: '📄', scissors: '✂️' };
+const emojis = { rock: '🪨', paper: '📄', scissors: '✂️' };
 
 // Elements
 const startBtn = document.getElementById('startGame');
@@ -67,6 +67,15 @@ function toggleMusic() {
   } else {
     sounds.bgm.pause();
   }
+}
+
+/* --- Guide Modal Functions (New) --- */
+function showGuide() {
+  document.getElementById('guide-modal').classList.add('active');
+}
+
+function closeGuide() {
+  document.getElementById('guide-modal').classList.remove('active');
 }
 
 function setDifficulty(level) {
