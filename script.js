@@ -4,6 +4,7 @@
 const THEME_KEY = 'epicScholarTheme';
 const root = document.documentElement;
 let currentTheme = localStorage.getItem(THEME_KEY) || 'dark';
+let isInitialLoad = true; // For entry animations
 
 function applyTheme(theme) {
     root.setAttribute('data-theme', theme);
@@ -36,7 +37,7 @@ function showFeedback(message) {
 const state = {
     posts: [],
     currentUser: {id: 'user123', name: 'Epic Student', initials: 'ES'},
-    activeView: 'home'
+    // activeView state is no longer needed
 };
 
 function createMockPosts() {
@@ -78,28 +79,33 @@ function createMockPosts() {
 createMockPosts();
 
 /* -------------------------------------------
-    VIEW SWITCHING
+    VIEW SWITCHING (REMOVED)
+    NEW navigation logic is in 'DOMContentLoaded'
 ------------------------------------------- */
 const allNavItems = document.querySelectorAll('.sidebar .nav-item');
-const allViewSections = document.querySelectorAll('.view-section');
 const feedContainer = document.getElementById('feed-container');
 
-function switchView(viewName) {
-    state.activeView = viewName;
-    allNavItems.forEach(n=>n.classList.remove('active'));
-    const newActiveNav = document.querySelector(`.nav-item[data-view="${viewName}"]`);
-    if (newActiveNav) newActiveNav.classList.add('active');
-    allViewSections.forEach(s => s.classList.remove('active'));
-    const target = document.getElementById(`${viewName}-view`);
-    if (target) target.classList.add('active');
-
-    // Only home feed scrolls
-    feedContainer.style.overflowY = (viewName === 'home') ? 'auto' : 'hidden';
-
-    if (viewName === 'profile') {
-        document.getElementById('displayUserId').textContent = state.currentUser.id;
-    }
+/**
+ * NEW: Sets the 'active' class on the sidebar link
+ * that matches the current page URL.
+ */
+function setActiveNav() {
+    // Get the current page file name (e.g., "index.html" or "messages.html")
+    let currentPath = window.location.pathname.split('/').pop();
+    if (currentPath === '') currentPath = 'index.html'; // Default to index.html for root
+    
+    allNavItems.forEach(nav => {
+        const navHref = nav.getAttribute('href');
+        
+        // Add 'active' class if href matches
+        if (navHref === currentPath) {
+            nav.classList.add('active');
+        } else {
+            nav.classList.remove('active');
+        }
+    });
 }
+
 
 /* -------------------------------------------
     FEED RENDERING / HELPERS
@@ -108,17 +114,12 @@ const feed = document.getElementById('feed');
 function escapeHtml(s){return String(s).replace(/[&"'<>]/g,c=>({"&":"&amp;","\"":"&quot;","'":"&#39;","<":"&lt;",">":"&gt;"}[c]))}
 function formatTime(seconds) {const minutes = Math.floor(seconds / 60);const remainingSeconds = Math.floor(seconds % 60);const paddedSeconds = remainingSeconds < 10 ? '0' + remainingSeconds : remainingSeconds;return `${minutes}:${paddedSeconds}`;}
 
-/**
- * Correct mapping from reaction arrays to counters
- */
-// We only have 'love' now, but we'll keep the map structure
 const reactionMap = { lovedBy: 'loves' };
 
 function createPostEl(post){
     const el=document.createElement('article');el.className='post';
     el.dataset.id = post.id;
     const authorName = post.authorId === state.currentUser.id ? 'You' : escapeHtml(post.author);
-    // const isLiked = (post.likedBy || []).includes(state.currentUser.id); // REMOVED
     const isLoved = (post.lovedBy || []).includes(state.currentUser.id);
 
     let mediaContent = '';
@@ -139,7 +140,6 @@ function createPostEl(post){
                             <div class="time-display duration" style="font-size:13px;">0:00</div>
                         </div>
                         <div style="display:flex; align-items:center; gap:10px;">
-                            <!-- UPDATED: Added Volume Container & Slider -->
                             <div class="volume-container">
                                 <button class="control-btn mute-btn" style="background:none; border:none; color:white; font-size:18px; cursor:pointer;">🔊</button>
                                 <input type="range" class="volume-slider" min="0" max="1" step="0.05" value="1" style="width: 80px; margin-left: 5px;">
@@ -165,9 +165,7 @@ function createPostEl(post){
         <div class="text-wrapping" style="margin-bottom: 20px; line-height: 1.6;">${escapeHtml(post.caption)}</div>
         <div class="media" data-id="${post.id}" style="border-radius: 12px; overflow: hidden; position: relative; height: 350px; margin-bottom: 20px; background-color: var(--secondary-glass); transition: all 0.24s;">
             ${mediaContent}
-            <!-- Like/Thumb overlay removed -->
             
-            <!-- UPDATED: New Heart Animation Overlay -->
             <div class="heart-animation-overlay">
                 <span class="heart-particle">❤️</span>
                 <span class="star-particle star-1">✨</span>
@@ -178,14 +176,10 @@ function createPostEl(post){
             </div>
         </div>
         <div class="actions" style="display: flex; gap: 15px; align-items: center; position: relative;">
-            <!-- Like button removed -->
             <div class="btn loveBtn ${isLoved ? 'toggled' : ''}" style="padding: 10px 15px; border-radius: 20px; cursor: pointer; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--text-color);">❤️ <span class="count">${post.loves||0}</span></div>
             <div class="btn commentToggle" style="padding: 10px 15px; border-radius: 20px; cursor: pointer; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--text-color);">💬 <span class="count">${(post.comments||[]).length}</span></div>
-            
-            <!-- RE-ADDED SHARE BUTTON -->
             <div class="btn shareBtn" style="padding: 10px 15px; border-radius: 20px; cursor: pointer; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--text-color);">🔗 Share</div>
 
-            <!-- RE-ADDED SHARE MENU - REMOVED ALL INLINE STYLES -->
             <div class="share-menu" aria-hidden="true">
                 <button class="share-copy">📋 Copy Link</button>
                 <button class="share-fb">📘 Facebook</button>
@@ -195,24 +189,17 @@ function createPostEl(post){
         </div>
     `;
 
-    // const likeBtn=el.querySelector('.likeBtn'); // REMOVED
     const loveBtn=el.querySelector('.loveBtn');
     const commentToggle=el.querySelector('.commentToggle');
-    // const shareBtn=el.querySelector('.shareBtn'); // RE-ADDED (but logic is handled by delegation)
-    // const shareMenu=el.querySelector('.share-menu'); // RE-ADDED (but logic is handled by delegation)
     const media=el.querySelector('.media');
-    // const thumbOverlay=media.querySelector('.thumb-overlay'); // REMOVED
-    const heartOverlay=media.querySelector('.heart-animation-overlay'); // UPDATED class
+    const heartOverlay=media.querySelector('.heart-animation-overlay');
 
-    // helper to update UI counts safely
     function updateCountsUI() {
-        // likeBtn.querySelector('.count').textContent = post.likes || 0; // REMOVED
         loveBtn.querySelector('.count').textContent = post.loves || 0;
     }
 
     /* ---------------------------
         Video controls
-        (UPDATED)
     ----------------------------*/
     if (post.type === 'video') {
         const video = el.querySelector('video');
@@ -229,8 +216,9 @@ function createPostEl(post){
         let isDraggingTimeline = false;
         const updateControls = () => {
             playPauseBtn.textContent = (video.paused || video.ended) ? '▶' : '⏸';
-            muteBtn.textContent = video.muted ? '🔇' : '🔊';
+            muteBtn.textContent = (video.muted || video.volume === 0) ? '🔇' : '🔊';
         };
+        
         const updateSeek = (e) => {
             const rect = timeline.getBoundingClientRect();
             let clientX = e.clientX;
@@ -238,6 +226,7 @@ function createPostEl(post){
             let pos = clientX - rect.left;
             pos = Math.max(0, Math.min(pos, rect.width));
             const percent = pos / rect.width;
+            
             if (!isNaN(video.duration)) {
                 video.currentTime = percent * video.duration;
                 progressFill.style.width = `${percent * 100}%`;
@@ -246,13 +235,10 @@ function createPostEl(post){
             }
         };
 
-        // UPDATED: Separated Play/Pause logic
-        // Click on video to play/pause
         video.addEventListener('click', (e) => {
-            if (e.target.closest('.controls-bar')) return; // Don't play/pause if clicking controls
+            if (e.target.closest('.controls-bar')) return;
             (video.paused || video.ended) ? video.play() : video.pause();
         });
-        // Click on button to play/pause
         playPauseBtn.addEventListener('click', () => {
             (video.paused || video.ended) ? video.play() : video.pause();
         });
@@ -264,7 +250,12 @@ function createPostEl(post){
             updateControls(); 
         });
 
-        video.addEventListener('loadedmetadata', () => { durationEl.textContent = formatTime(video.duration); updateControls(); });
+        video.addEventListener('loadedmetadata', () => { 
+            durationEl.textContent = formatTime(video.duration); 
+            updateControls();
+            const initPercent = video.volume * 100;
+            volumeSlider.style.background = `linear-gradient(to right, var(--primary-color) ${initPercent}%, rgba(255, 255, 255, 0.4) ${initPercent}%)`;
+        });
         video.addEventListener('timeupdate', () => {
             if (!isNaN(video.duration) && !isDraggingTimeline) {
                 const percent = (video.currentTime / video.duration) * 100;
@@ -273,10 +264,15 @@ function createPostEl(post){
                 currentTimeEl.textContent = formatTime(video.currentTime);
             }
         });
-        // video.addEventListener('ended', ...); // Moved up
 
         const startDrag = (e) => { isDraggingTimeline = true; video.pause(); updateSeek(e); };
-        const endDrag = () => { if (isDraggingTimeline) { isDraggingTimeline = false; video.play(); updateControls(); } };
+        const endDrag = (e) => { 
+            if (isDraggingTimeline) { 
+                isDraggingTimeline = false; 
+                video.play(); 
+                updateControls(); 
+            } 
+        };
 
         timeline.addEventListener('mousedown', startDrag);
         timeline.addEventListener('touchstart', startDrag);
@@ -286,29 +282,34 @@ function createPostEl(post){
         document.addEventListener('touchend', endDrag);
         timeline.addEventListener('click', (e) => { if (e.target.closest('.timeline-thumb')) return; if (!isDraggingTimeline) updateSeek(e); });
 
-        // UPDATED: Volume and Mute Listeners
+        // --- FIX for Mute Button ---
         muteBtn.addEventListener('click', () => { 
             video.muted = !video.muted; 
-            if (!video.muted) {
-                video.volume = 0.5; // Unmute to a reasonable volume
-                volumeSlider.value = 0.5;
+            if (video.muted) {
+                video.volume = 0; // Set volume to 0 when muting
+            } else {
+                video.volume = 0.5; // Restore volume when unmuting
             }
+            video.dispatchEvent(new Event('volumechange')); 
             updateControls(); 
         });
 
         volumeSlider.addEventListener('input', (e) => {
-            video.volume = e.target.value;
-            video.muted = e.target.value === "0";
+            const newVolume = e.target.value;
+            video.volume = newVolume;
+            video.muted = newVolume === "0";
+            
+            const newPercent = newVolume * 100;
+            volumeSlider.style.background = `linear-gradient(to right, var(--primary-color) ${newPercent}%, rgba(255, 255, 255, 0.4) ${newPercent}%)`;
+            
             updateControls();
         });
         
         video.addEventListener('volumechange', () => {
+            const percent = video.volume * 100;
             volumeSlider.value = video.volume;
-            if (video.muted || video.volume === 0) {
-                muteBtn.textContent = '🔇';
-            } else {
-                muteBtn.textContent = '🔊';
-            }
+            volumeSlider.style.background = `linear-gradient(to right, var(--primary-color) ${percent}%, rgba(255, 255, 255, 0.4) ${percent}%)`;
+            updateControls();
         });
         
         fullScreenBtn.addEventListener('click', () => {
@@ -318,228 +319,226 @@ function createPostEl(post){
             else if (container.msRequestFullscreen) container.msRequestFullscreen();
         });
     }
-// Enlarged image modal logic for feed images
-const imageModal = document.getElementById('imageModal');
-const modalImage = document.getElementById('modalImage');
-const imageModalClose = document.getElementById('imageModalClose');
 
-// REMOVED: This listener is now inside createPostEl
-// document.getElementById('feed').addEventListener('click', (e) => { ... });
+    // --- FIX for Modal Close Animation ---
+    const imageModal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    const imageModalClose = document.getElementById('imageModalClose');
+    let lastOriginRect = null;
 
-// Close when clicking the close button
-imageModalClose.addEventListener('click', () => {
-  imageModal.classList.remove('show');
-  setTimeout(() => imageModal.style.display = 'none', 150);
-});
+    function closeImageModalBounce() {
+        if (!imageModal || !modalImage) return; 
+        if (!lastOriginRect) {
+            imageModal.classList.remove("show");
+            setTimeout(() => imageModal.style.display = "none", 160);
+            return;
+        }
+        
+        const vw = window.innerWidth, vh = window.innerHeight;
+        const centerX = (vw/2) - (lastOriginRect.left + lastOriginRect.width / 2);
+        const centerY = (vh/2) - (lastOriginRect.top + lastOriginRect.height / 2);
+        
+        const modalImgWidth = modalImage.offsetWidth || 1;
+        const modalImgHeight = modalImage.offsetHeight || 1;
+        
+        const scaleX = lastOriginRect.width / modalImgWidth;
+        const scaleY = lastOriginRect.height / modalImgHeight;
+        
+        modalImage.classList.remove('modal-image-animate-in');
+        modalImage.classList.add('modal-image-animate-out');
+        
+        modalImage.style.transform = `translate(${centerX}px, ${centerY}px) scale(${scaleX}, ${scaleY})`;
+        modalImage.style.opacity = "0.8";
 
-// Close when clicking outside the image area
-imageModal.addEventListener('click', (e) => {
-  if (e.target === imageModal) {
-    imageModal.classList.remove('show');
-    setTimeout(() => imageModal.style.display = 'none', 150);
-  }
-});
+        setTimeout(() => {
+            imageModal.classList.remove("show");
+            imageModal.style.display = "none";
+            modalImage.classList.remove('modal-image-animate-out');
+            modalImage.style.transform = "";
+            modalImage.style.opacity = ""; 
+            lastOriginRect = null;
+        }, 580); 
+    }
 
-// Optionally: support Escape key to close modal
-document.addEventListener('keydown', (e) => {
-  if (e.key === "Escape" && imageModal.classList.contains('show')) {
-    imageModal.classList.remove('show');
-    setTimeout(() => imageModal.style.display = 'none', 150);
-  }
-});
-// --- Bouncy (from-image) modal animation for enlarged images ---
+    if (imageModal && !imageModal.dataset.listenerAttached) {
+        imageModalClose.addEventListener('click', closeImageModalBounce);
+        imageModal.addEventListener('click', (e) => {
+            if (e.target === imageModal) closeImageModalBounce();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "Escape" && imageModal.classList.contains('show'))
+                closeImageModalBounce();
+        });
+        imageModal.dataset.listenerAttached = 'true';
+    }
 
-let lastOriginRect = null; // store where the image "came from" for close animation
-
-// REMOVED: This listener is now inside createPostEl
-// feed.addEventListener('click', (e) => { ... });
-
-// Close modal with bounce-back to image
-function closeImageModalBounce() {
-  const modal = document.getElementById('imageModal');
-  const modalImg = document.getElementById('modalImage');
-  if (!lastOriginRect) {
-    // fallback: just fade out
-    modal.classList.remove("show");
-    setTimeout(() => modal.style.display = "none", 160);
-    return;
-  }
-  // Bounce-back transition to source image location/size
-  const vw = window.innerWidth, vh = window.innerHeight;
-  const centerX = (vw/2) - (lastOriginRect.left + lastOriginRect.width / 2);
-  const centerY = (vh/2) - (lastOriginRect.top + lastOriginRect.height / 2);
-  const scaleX = lastOriginRect.width / modalImg.offsetWidth;
-  const scaleY = lastOriginRect.height / modalImg.offsetHeight;
-  modalImg.classList.remove('modal-image-animate-in');
-  modalImg.classList.add('modal-image-animate-out');
-  modalImg.style.transform =
-    `translate(${centerX}px, ${centerY}px) scale(${scaleX}, ${scaleY})`;
-  modalImg.style.opacity = "0.8";
-  // After animation ends, hide the modal
-  setTimeout(() => {
-    modal.classList.remove("show");
-    modal.style.display = "none";
-    modalImg.classList.remove('modal-image-animate-out');
-    modalImg.style.transform = "";
-    lastOriginRect = null;
-  }, 580); // match the closing cubic-bezier
-}
-
-// Use this for all closes
-document.getElementById('imageModalClose').addEventListener('click', closeImageModalBounce);
-document.getElementById('imageModal').addEventListener('click', (e) => {
-  if (e.target === document.getElementById('imageModal'))
-    closeImageModalBounce();
-});
-document.addEventListener('keydown', (e) => {
-  if (e.key === "Escape" && document.getElementById('imageModal').classList.contains('show'))
-    closeImageModalBounce();
-});
 
     /* -------------------------------------------
-        Reaction logic (fixed counting and animations)
-        - uses reactionMap to map arrays -> counters
+        Reaction logic
     -------------------------------------------*/
     function toggleReaction(btn, reactionKey, overlay, reactionLabel) {
         const userId = state.currentUser.id;
         post[reactionKey] = post[reactionKey] || [];
         const counterKey = reactionMap[reactionKey];
 
-        // If user already reacted, remove
         const existingIndex = post[reactionKey].indexOf(userId);
         if (existingIndex !== -1) {
             post[reactionKey].splice(existingIndex, 1);
             post[counterKey] = Math.max(0, (post[counterKey] || 1) - 1);
             btn.classList.remove('toggled');
         } else {
-            // add reaction
             post[reactionKey].push(userId);
             post[counterKey] = (post[counterKey] || 0) + 1;
             btn.classList.add('toggled');
 
-            // visual feedback: small pop on button + overlay on media
             btn.classList.remove('pulse');
-            void btn.offsetWidth; // force reflow for animation restart
+            void btn.offsetWidth;
             btn.classList.add('pulse');
 
             if (overlay) {
                 overlay.classList.add('show');
-                setTimeout(()=> overlay.classList.remove('show'), 800); // Increased duration for new animation
+                setTimeout(()=> overlay.classList.remove('show'), 800);
             }
-            showFeedback(`${reactionLabel} post! ${reactionLabel === 'Loved' ? '❤️' : ''}`); // Simplified feedback
+            showFeedback(`${reactionLabel} post! ${reactionLabel === 'Loved' ? '❤️' : ''}`);
         }
         updateCountsUI();
     }
 
-    // likeBtn.addEventListener('click', () => toggleReaction(likeBtn, 'likedBy', thumbOverlay, 'Liked')); // REMOVED
     loveBtn.addEventListener('click', () => toggleReaction(loveBtn, 'lovedBy', heartOverlay, 'Loved'));
 
-    // UPDATED: Combined single/double tap logic
     let lastTap = 0;
     let tapTimer;
 
     media.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+
         const now = Date.now();
         const dt = now - lastTap;
         lastTap = now;
 
-        clearTimeout(tapTimer); // Cancel any pending single-click
+        clearTimeout(tapTimer);
 
         if (dt < 300 && dt > 0) {
-            // DOUBLE-TAP detected
-            e.preventDefault(); // Prevent text selection, etc.
+            e.preventDefault();
+            
+            const rect = media.getBoundingClientRect();
+            const clickX = e.clientX;
+            const clickY = e.clientY;
+            
+            const relativeX = clickX - rect.left;
+            const relativeY = clickY - rect.top;
+
+            heartOverlay.style.left = `${relativeX}px`;
+            heartOverlay.style.top = `${relativeY}px`;
+
             toggleReaction(loveBtn, 'lovedBy', heartOverlay, 'Loved');
-            lastTap = 0; // Reset tap-timing
+            lastTap = 0;
         } else {
-            // SINGLE-TAP: Set a timer
             tapTimer = setTimeout(() => {
-                // Timer fired, so it was a single-click
-                // Don't enlarge if it's a video
                 if (post.type === 'video') return; 
 
-                // Find the image element
                 const img = media.querySelector('img');
-                if (img && img.src) {
-                    // --- Start of Enlarge Logic ---
+                if (img && img.src && imageModal && modalImage) {
                     const imgRect = img.getBoundingClientRect();
-                    lastOriginRect = imgRect; // save for closing animation
-
-                    const modal = document.getElementById('imageModal');
-                    const modalImg = document.getElementById('modalImage');
+                    lastOriginRect = imgRect;
+                    modalImage.src = img.src;
                     
-                    // Set src *before* measuring
-                    modalImg.src = img.src;
-
-                    // Force modal to be visible but off-screen to get width/height
-                    modal.style.visibility = 'hidden';
-                    modal.style.display = 'flex';
+                    imageModal.style.visibility = 'hidden';
+                    imageModal.style.display = 'flex';
                     
-                    const modalImgWidth = modalImg.offsetWidth;
-                    const modalImgHeight = modalImg.offsetHeight;
+                    const modalImgWidth = modalImage.offsetWidth || 1;
+                    const modalImgHeight = modalImage.offsetHeight || 1;
 
-                    // Hide it again before animation
-                    modal.style.visibility = 'visible';
-                    modal.style.display = 'none'; // Will be set to flex by timeout
+                    imageModal.style.visibility = 'visible';
+                    imageModal.style.display = 'none';
 
                     setTimeout(() => {
-                        modal.style.display = "flex";
+                        imageModal.style.display = "flex";
                         
                         const vw = window.innerWidth, vh = window.innerHeight;
                         const centerX = (vw / 2) - (imgRect.left + imgRect.width / 2);
                         const centerY = (vh / 2) - (imgRect.top + imgRect.height / 2);
                         
-                        // Fallback if width/height is 0
                         const scaleX = modalImgWidth ? (imgRect.width / modalImgWidth) : 1;
                         const scaleY = modalImgHeight ? (imgRect.height / modalImgHeight) : 1;
                         
-                        modalImg.style.transformOrigin = "center center";
-                        modalImg.style.transform =
-                            `translate(${centerX}px, ${centerY}px) scale(${scaleX}, ${scaleY})`;
-                        modalImg.style.opacity = '0.8';
-                        modalImg.classList.remove("modal-image-animate-in", "modal-image-animate-out");
+                        modalImage.style.transformOrigin = "center center";
+                        modalImage.style.transform = `translate(${centerX}px, ${centerY}px) scale(${scaleX}, ${scaleY})`;
+                        modalImage.style.opacity = '0.8';
+                        modalImage.classList.remove("modal-image-animate-in", "modal-image-animate-out");
 
-                        void modalImg.offsetWidth;
-                        modal.classList.add("show");
+                        void modalImage.offsetWidth;
+                        imageModal.classList.add("show");
                         setTimeout(() => {
-                            modalImg.classList.add("modal-image-animate-in");
-                            modalImg.style.transform = "";
-                            modalImg.style.opacity = "1";
+                            modalImage.classList.add("modal-image-animate-in");
+                            modalImage.style.transform = "";
+                            modalImage.style.opacity = "1";
                         }, 10);
                     }, 6);
-                    // --- End of Enlarge Logic ---
                 }
-            }, 300); // Wait 300ms to see if it's a double-tap
+            }, 300);
         }
     });
 
-    // Comments
     commentToggle.addEventListener('click', (e) => {
         e.stopPropagation();
         openCommentModal(post, () => {
             commentToggle.querySelector('.count').textContent = (post.comments||[]).length;
         });
     });
-
-    // Share logic is now handled by the IIFE at the bottom
     
     return el;
 }
 
 function renderFeed(postsToRender = state.posts) {
-    feed.style.opacity = 0;
-    setTimeout(() => {
+    if (!feed) return; // Do nothing if feed element doesn't exist
+
+    if (isInitialLoad) {
         feed.innerHTML = '';
         postsToRender.forEach(p => {
             const el = createPostEl(p);
             feed.appendChild(el);
         });
-        feed.style.opacity = 1;
-    }, postsToRender.length !== state.posts.length ? 200 : 0);
+        isInitialLoad = false;
+    } else {
+        feed.style.opacity = 0;
+        setTimeout(() => {
+            feed.innerHTML = '';
+            postsToRender.forEach(p => {
+                const el = createPostEl(p);
+                feed.appendChild(el);
+            });
+            feed.style.opacity = 1;
+        }, postsToRender.length !== state.posts.length ? 200 : 0);
+    }
 }
-renderFeed();
+
+/**
+ * NEW: Smoothly adds a new post to the feed
+ */
+function addNewPostToFeed(post) {
+    if (!feed) return;
+
+    const el = createPostEl(post);
+    el.classList.add('post-enter'); // Start state (hidden)
+    
+    feed.prepend(el);
+    
+    // Force reflow
+    void el.offsetWidth; 
+    
+    // Trigger animation
+    el.classList.add('post-enter-active');
+    
+    // Clean up class
+    setTimeout(() => {
+        el.classList.remove('post-enter', 'post-enter-active');
+    }, 600); // Match CSS transition
+}
+
 
 /* -------------------------------------------
-    COMMENT MODAL LOGIC (with right/left alignment)
+    COMMENT MODAL LOGIC
 -------------------------------------------*/
 const commentModal = document.getElementById('commentModal');
 const commentModalList = document.getElementById('commentModalList');
@@ -548,6 +547,7 @@ const commentModalPostBtn = document.getElementById('commentModalPostBtn');
 let currentPostUpdateCallback = null;
 
 function renderCommentsForModal(post) {
+    if (!commentModalList) return;
     commentModalList.innerHTML = '';
     (post.comments || []).forEach(c => {
         const isMine = c.by === state.currentUser.name;
@@ -567,6 +567,7 @@ function renderCommentsForModal(post) {
 }
 
 function openCommentModal(post, updateCallback) {
+    if (!commentModal || !commentModalPostBtn || !commentModalTextarea) return;
     currentPostUpdateCallback = updateCallback;
     commentModalPostBtn.dataset.postId = post.id;
     renderCommentsForModal(post);
@@ -576,46 +577,52 @@ function openCommentModal(post, updateCallback) {
     commentModalTextarea.focus();
 }
 
-commentModalPostBtn.addEventListener('click', () => {
-    const text = commentModalTextarea.value.trim();
-    if (!text) return;
-    const postId = commentModalPostBtn.dataset.postId;
-    const post = state.posts.find(p => p.id === postId);
-    if (!post) return;
+if (commentModalPostBtn) {
+    commentModalPostBtn.addEventListener('click', () => {
+        const text = commentModalTextarea.value.trim();
+        if (!text) return;
+        const postId = commentModalPostBtn.dataset.postId;
+        const post = state.posts.find(p => p.id === postId);
+        if (!post) return;
 
-    post.comments = post.comments || [];
-    post.comments.push({
-        by: state.currentUser.name,
-        byInitials: state.currentUser.initials,
-        text
+        post.comments = post.comments || [];
+        post.comments.push({
+            by: state.currentUser.name,
+            byInitials: state.currentUser.initials,
+            text
+        });
+
+        commentModalTextarea.value = '';
+        commentModalTextarea.style.height = 'auto';
+        renderCommentsForModal(post);
+        if (currentPostUpdateCallback) currentPostUpdateCallback();
+        showFeedback("Comment posted! 💬");
     });
+}
 
-    commentModalTextarea.value = '';
-    commentModalTextarea.style.height = 'auto';
-    renderCommentsForModal(post);
-    if (currentPostUpdateCallback) currentPostUpdateCallback();
-    showFeedback("Comment posted! 💬");
-});
-
-commentModalTextarea.addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = (this.scrollHeight) + 'px';
-});
-commentModal.addEventListener('click', (e) => {
-    if (e.target === commentModal) {
-        commentModal.classList.remove('show');
-        commentModal.setAttribute('aria-hidden','true');
-    }
-});
+if (commentModalTextarea) {
+    commentModalTextarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+}
+if (commentModal) {
+    commentModal.addEventListener('click', (e) => {
+        if (e.target === commentModal) {
+            commentModal.classList.remove('show');
+            commentModal.setAttribute('aria-hidden','true');
+        }
+    });
+}
 document.addEventListener('keydown', (e) => {
-    if (e.key === "Escape" && commentModal.classList.contains('show')) {
+    if (e.key === "Escape" && commentModal && commentModal.classList.contains('show')) {
         commentModal.classList.remove('show');
         commentModal.setAttribute('aria-hidden','true');
     }
 });
 
 /* -------------------------------------------
-    RIGHT PANEL: improved responsiveness & faster hover/click
+    RIGHT PANEL
 -------------------------------------------*/
 ['closeReminder', 'closeNotifs', 'closeSchedule', 'closeTests', 'cancelUpload'].forEach(id => {
     const el = document.getElementById(id);
@@ -639,7 +646,6 @@ miniCards.forEach(el => {
 
     el.addEventListener('mouseenter', () => handleActivation(true));
     el.addEventListener('mouseleave', () => {
-        // much faster collapse timeout to make UI feel snappy
         setTimeout(() => {
             if (!el.matches(':hover') && el.classList.contains('active')) handleActivation(false);
         }, 140);
@@ -653,243 +659,229 @@ miniCards.forEach(el => {
 });
 
 /* -------------------------------------------
-    UPLOAD HANDLING & DATA INIT
+    UPLOAD HANDLING
 ------------------------------------------- */
 const epicFileInput=document.getElementById('epicFileInput');
 const epicPreview=document.getElementById('epicPreview');
 const epicCaption=document.getElementById('epicCaption');
 let pending=null;
 
-epicFileInput.addEventListener('change',(e)=>{
-    const file=e.target.files[0];
-    if(!file) {
-        document.getElementById('fileChooseLabel').textContent = 'Select file';
-        epicPreview.innerHTML='Preview';
-        pending = null;
-        return;
-    }
-    const url=URL.createObjectURL(file);
-    const type=file.type.startsWith('video')?'video':'image';
-    pending={file,url,type};
-    document.getElementById('fileChooseLabel').textContent = file.name;
-    epicPreview.innerHTML=`<div style="width:100%; height:100%; display:flex; justify-content:center; align-items:center; overflow:hidden;">
-        ${type==='image'
-            ? `<img src="${url}" style="max-width:100%;max-height:100%; object-fit: contain; border-radius:6px;">`
-            : `<video src="${url}" controls style="max-width:100%;max-height:100%; object-fit: contain; border-radius:6px;"></video>`
+if (epicFileInput) {
+    epicFileInput.addEventListener('change',(e)=>{
+        const file=e.target.files[0];
+        if(!file) {
+            document.getElementById('fileChooseLabel').textContent = 'Select file';
+            epicPreview.innerHTML='Preview';
+            pending = null;
+            return;
         }
-    </div>`;
-});
-
-document.getElementById('confirmUpload').addEventListener('click',()=>{
-    if(!pending) { showFeedback("Please select a file first! 👆"); return; }
-
-    const confirmBtn = document.getElementById('confirmUpload');
-    confirmBtn.textContent = 'Posting...';
-    confirmBtn.disabled = true;
-
-    setTimeout(() => {
-        state.posts.unshift({
-            id:Date.now().toString(),
-            author:state.currentUser.name,
-            authorId:state.currentUser.id,
-            authorInitials:state.currentUser.initials,
-            time:Date.now(),
-            url:pending.url,
-            type:pending.type,
-            caption:epicCaption.value||'Shared without a caption.',
-            likes:0,loves:0,comments:[], likedBy: [], lovedBy: []
-        });
-
-        renderFeed();
-        showFeedback("Epic posted successfully! 🎉");
-
-        pending=null;
-        epicFileInput.value='';
-        epicPreview.innerHTML='Preview';
-        epicCaption.value='';
-        document.getElementById('fileChooseLabel').textContent = 'Select file';
-        document.getElementById('addEpicCard').classList.remove('active');
-        confirmBtn.textContent = 'Post';
-        confirmBtn.disabled = false;
-    }, 700);
-});
-
-/* Init right-panel lists */
-document.getElementById('remindersList').innerHTML='<li style="color: var(--primary-color)">Math (Algebra) - Due Today</li><li>English Essay - Draft 1 Review</li><li>Science Lab Prep - Tomorrow</li>';
-document.getElementById('notifList').innerHTML='<li style="color: var(--primary-color)">New message from Prof. X</li><li>Your post received 5 loves!</li><li>Reminder: EduBot available for tutoring.</li>';
-document.getElementById('schedulesList').innerHTML='<li style="color: var(--primary-color)">10:00 AM - Group Study Session</li><li>1:00 PM - Math Class</li><li>3:00 PM - Library Research</li>';
-document.getElementById('testsList').innerHTML='<li style="color: #ff416c; font-weight: bold;">Chemistry Test: Oct 30</li><li>Physics Quiz: Nov 5</li><li>History Midterm: Nov 15</li>';
-
-/* -------------------------------------------
-    SEARCH / NAV (small polish)
--------------------------------------------*/
-const searchBar = document.getElementById('searchBar');
-searchBar.addEventListener('input', (e) => {
-    const searchTerm = e.target.value.toLowerCase();
-    const filteredPosts = state.posts.filter(p => p.caption.toLowerCase().includes(searchTerm) || p.author.toLowerCase().includes(searchTerm));
-    renderFeed(filteredPosts);
-});
-
-document.getElementById('refreshBtn').addEventListener('click', () => {
-    searchBar.value = '';
-    renderFeed(state.posts);
-    showFeedback("Feed Refreshed! 🔄");
-    feedContainer.scrollTo({ top: 0, behavior: 'smooth' });
-});
-
-const navWrap=document.getElementById('navWrap');
-const underline=document.getElementById('navUnderline');
-
-function updateUnderline(el){
-    // intentionally disabled because the user asked to remove the visible bar
-    // keep function safe (no-op)
-    return;
+        const url=URL.createObjectURL(file);
+        const type=file.type.startsWith('video')?'video':'image';
+        pending={file,url,type};
+        document.getElementById('fileChooseLabel').textContent = file.name;
+        epicPreview.innerHTML=`<div style="width:100%; height:100%; display:flex; justify-content:center; align-items:center; overflow:hidden;">
+            ${type==='image'
+                ? `<img src="${url}" style="max-width:100%;max-height:100%; object-fit: contain; border-radius:6px;">`
+                : `<video src="${url}" controls style="max-width:100%;max-height:100%; object-fit: contain; border-radius:6px;"></video>`
+            }
+        </div>`;
+    });
 }
 
-allNavItems.forEach(it=>{
-    it.addEventListener('mouseenter', ()=>{ /* no underline movement */ });
-    it.addEventListener('click', (e)=>{
-        // Prevent default navigation for SPA
-        e.preventDefault(); 
-        
-        // Get the view name from the data-view attribute (e.g., "home", "messages")
-        const viewName = it.dataset.view;
-        
-        // Use the SPA view switching function
-        switchView(viewName);
-        
-        // Update the underline to the clicked item
-        // updateUnderline(it); // This is still disabled as per original code
+const confirmUploadBtn = document.getElementById('confirmUpload');
+if (confirmUploadBtn) {
+    confirmUploadBtn.addEventListener('click',()=>{
+        if(!pending) { showFeedback("Please select a file first! 👆"); return; }
+
+        confirmUploadBtn.textContent = 'Posting...';
+        confirmUploadBtn.disabled = true;
+
+        setTimeout(() => {
+            const newPost = {
+                id:Date.now().toString(),
+                author:state.currentUser.name,
+                authorId:state.currentUser.id,
+                authorInitials:state.currentUser.initials,
+                time:Date.now(),
+                url:pending.url,
+                type:pending.type,
+                caption:epicCaption.value||'Shared without a caption.',
+                likes:0,loves:0,comments:[], likedBy: [], lovedBy: []
+            };
+            
+            state.posts.unshift(newPost);
+            
+            // MODIFIED: Call the new smooth animation function
+            addNewPostToFeed(newPost);
+            
+            showFeedback("Epic posted successfully! 🎉");
+
+            // Reset form
+            pending=null;
+            epicFileInput.value='';
+            epicPreview.innerHTML='Preview';
+            epicCaption.value='';
+            document.getElementById('fileChooseLabel').textContent = 'Select file';
+            document.getElementById('addEpicCard').classList.remove('active');
+            confirmUploadBtn.textContent = 'Post';
+            confirmUploadBtn.disabled = false;
+        }, 700);
     });
-});
+}
 
-navWrap.addEventListener('mouseleave', () => { /* no op - underline removed */ });
+/* Init right-panel lists */
+const remindersList = document.getElementById('remindersList');
+if (remindersList) remindersList.innerHTML='<li style="color: var(--primary-color)">Math (Algebra) - Due Today</li><li>English Essay - Draft 1 Review</li><li>Science Lab Prep - Tomorrow</li>';
 
-window.addEventListener('resize', ()=>{ /* no-op since no underline */ });
+const notifList = document.getElementById('notifList');
+if (notifList) notifList.innerHTML='<li style="color: var(--primary-color)">New message from Prof. X</li><li>Your post received 5 loves!</li><li>Reminder: EduBot available for tutoring.</li>';
 
+const schedulesList = document.getElementById('schedulesList');
+if (schedulesList) schedulesList.innerHTML='<li style="color: var(--primary-color)">10:00 AM - Group Study Session</li><li>1:00 PM - Math Class</li><li>3:00 PM - Library Research</li>';
+
+const testsList = document.getElementById('testsList');
+if (testsList) testsList.innerHTML='<li style="color: #ff416c; font-weight: bold;">Chemistry Test: Oct 30</li><li>Physics Quiz: Nov 5</li><li>History Midterm: Nov 15</li>';
+
+/* -------------------------------------------
+    SEARCH / NAV (MPA Version)
+-------------------------------------------*/
+const searchBar = document.getElementById('searchBar');
+if (searchBar) {
+    searchBar.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const filteredPosts = state.posts.filter(p => p.caption.toLowerCase().includes(searchTerm) || p.author.toLowerCase().includes(searchTerm));
+        renderFeed(filteredPosts);
+    });
+}
+
+const refreshBtn = document.getElementById('refreshBtn');
+if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => {
+        if (searchBar) searchBar.value = '';
+        renderFeed(state.posts);
+        showFeedback("Feed Refreshed! 🔄");
+        if (feedContainer) feedContainer.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+}
+
+// REMOVED: All underline logic is gone
+// REMOVED: All nav click listeners are gone (<a> tags handle it)
+
+
+/* -------------------------------------------
+    INITIALIZATION
+-------------------------------------------*/
 document.addEventListener('DOMContentLoaded', () => {
-    // initial micro polish: pre-warm the feed to avoid layout jank
-    renderFeed();
-    // Set active nav based on initial state
-    const activeNav = document.querySelector(`.nav-item[data-view="${state.activeView}"]`);
-    if(activeNav) {
-        // updateUnderline(activeNav); // Disabled
+    // Render the feed *only* if the feed element exists on this page
+    if (document.getElementById('feed')) {
+        renderFeed();
+    }
+    
+    // NEW: Set active nav link based on the current page URL
+    setActiveNav();
+    
+    // Set up theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('change', toggleTheme);
     }
 });
 
-document.getElementById('themeToggle').addEventListener('change', toggleTheme);
 
-/* CANCEL UPLOAD: clear preview and selection */
+/* -------------------------------------------
+    SHARE MENU & UPLOAD CANCEL (IIFE)
+-------------------------------------------*/
 (function(){
-  const cancelBtn = document.getElementById('cancelUpload');
-  const epicFileInput = document.getElementById('epicFileInput');
-  const epicPreview = document.getElementById('epicPreview');
-  const fileChooseLabel = document.getElementById('fileChooseLabel');
+    const cancelBtn = document.getElementById('cancelUpload');
+    const epicFileInput = document.getElementById('epicFileInput');
+    const epicPreview = document.getElementById('epicPreview');
+    const fileChooseLabel = document.getElementById('fileChooseLabel');
 
-  if (cancelBtn) {
-    cancelBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      // clear file input value (works for modern browsers)
-      if (epicFileInput) {
-        try { epicFileInput.value = ''; } catch(err){ /* ignore */ }
-      }
-      // remove pending preview (matches the variable used in your script)
-      if (typeof pending !== 'undefined') pending = null;
-      // reset preview UI
-      if (epicPreview) epicPreview.innerHTML = 'Preview';
-      if (fileChooseLabel) fileChooseLabel.textContent = 'Select file';
-      // also close the panel visually
-      const card = cancelBtn.closest('.mini-card');
-      if (card) card.classList.remove('active');
-      showFeedback('Upload canceled.');
-    });
-  }
-
-  /* -------------------------------------------
-      RE-ADDED: SHARE MENU LOGIC (Event Delegation)
-  ------------------------------------------- */
-  
-  // Close all menus when clicking anywhere
-  document.addEventListener('click', () => {
-    document.querySelectorAll('.share-menu.show').forEach(m => {
-      m.classList.remove('show');
-      m.setAttribute('aria-hidden','true');
-    });
-  });
-
-  // delegate share toggle inside posts
-  document.addEventListener('click', (e) => {
-    const shareBtn = e.target.closest('.shareBtn');
-    if (!shareBtn) return; // Didn't click a share button
-    e.stopPropagation(); // Stop the click from bubbling to the document listener above
-    
-    const postRoot = shareBtn.closest('article');
-    if (!postRoot) return;
-    const menu = postRoot.querySelector('.share-menu');
-    if (!menu) return;
-
-    const isAlreadyShown = menu.classList.contains('show');
-
-    // Close *other* menus first
-    document.querySelectorAll('.share-menu.show').forEach(m => {
-      if (m !== menu) { 
-        m.classList.remove('show'); 
-        m.setAttribute('aria-hidden','true'); 
-      }
-    });
-    
-    // Toggle *this* menu
-    if (!isAlreadyShown) {
-        menu.classList.add('show');
-        menu.setAttribute('aria-hidden', 'false');
-    } else {
-        menu.classList.remove('show');
-        menu.setAttribute('aria-hidden', 'true');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (epicFileInput) {
+                try { epicFileInput.value = ''; } catch(err){ /* ignore */ }
+            }
+            if (typeof pending !== 'undefined') pending = null;
+            if (epicPreview) epicPreview.innerHTML = 'Preview';
+            if (fileChooseLabel) fileChooseLabel.textContent = 'Select file';
+            const card = cancelBtn.closest('.mini-card');
+            if (card) card.classList.remove('active');
+            showFeedback('Upload canceled.');
+        });
     }
-  });
 
-  // Share action handlers: use event delegation for buttons inside menu
-  document.addEventListener('click', (e) => {
-    // Look for a click on any button inside a share menu
-    const btn = e.target.closest('.share-menu button');
-    if (!btn) return;
-    e.stopPropagation(); // Stop click from closing the menu immediately
-    
-    const menu = btn.closest('.share-menu');
-    const post = btn.closest('article');
-    const postId = post?.dataset?.id || ('post-' + Date.now());
-    const postUrl = `https://epicscholar.com/post/${postId}`;
-    const postCaption = post?.querySelector('.text-wrapping')?.textContent || 'Check out this post!';
+    /* SHARE MENU LOGIC */
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('.mini-card')) return;
+        document.querySelectorAll('.share-menu.show').forEach(m => {
+            m.classList.remove('show');
+            m.setAttribute('aria-hidden','true');
+        });
+    });
 
-    if (btn.classList.contains('share-copy')) {
-      // Use execCommand as a fallback for iframe environments
-      try {
-        const tempInput = document.createElement('textarea');
-        tempInput.value = postUrl;
-        document.body.appendChild(tempInput);
-        tempInput.select();
-        document.execCommand('copy');
-        document.body.removeChild(tempInput);
-        showFeedback('Link copied! 📋');
-      } catch (err) {
-        showFeedback('Copy failed.');
-      }
-    } else if (btn.classList.contains('share-fb')) {
-        const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}&quote=${encodeURIComponent(postCaption)}`;
-        window.open(url, '_blank');
-    } else if (btn.classList.contains('share-whatsapp')) {
-        const url = `https://wa.me/?text=${encodeURIComponent(postCaption + '\n' + postUrl)}`;
-        window.open(url, '_blank');
-    } else if (btn.classList.contains('share-twitter')) {
-        const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(postCaption)}&url=${encodeURIComponent(postUrl)}`;
-        window.open(url, '_blank');
-    }
-    
-    // Close the menu after action
-    if (menu) { 
-      menu.classList.remove('show'); 
-      menu.setAttribute('aria-hidden', 'true'); 
-    }
-  });
+    document.addEventListener('click', (e) => {
+        const shareBtn = e.target.closest('.shareBtn');
+        if (!shareBtn) return;
+        e.stopPropagation();
+        
+        const postRoot = shareBtn.closest('article');
+        if (!postRoot) return;
+        const menu = postRoot.querySelector('.share-menu');
+        if (!menu) return;
+
+        const isAlreadyShown = menu.classList.contains('show');
+
+        document.querySelectorAll('.share-menu.show').forEach(m => {
+            if (m !== menu) { 
+                m.classList.remove('show'); 
+                m.setAttribute('aria-hidden','true'); 
+            }
+        });
+        
+        menu.classList.toggle('show', !isAlreadyShown);
+        menu.setAttribute('aria-hidden', isAlreadyShown);
+    });
+
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.share-menu button');
+        if (!btn) return;
+        e.stopPropagation();
+        
+        const menu = btn.closest('.share-menu');
+        const post = btn.closest('article');
+        const postId = post?.dataset?.id || ('post-' + Date.now());
+        const postUrl = `https://epicscholar.com/post/${postId}`;
+        const postCaption = post?.querySelector('.text-wrapping')?.textContent || 'Check out this post!';
+
+        if (btn.classList.contains('share-copy')) {
+            try {
+                const tempInput = document.createElement('textarea');
+                tempInput.value = postUrl;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                showFeedback('Link copied! 📋');
+            } catch (err) {
+                showFeedback('Copy failed.');
+            }
+        } else if (btn.classList.contains('share-fb')) {
+            const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}&quote=${encodeURIComponent(postCaption)}`;
+            window.open(url, '_blank');
+        } else if (btn.classList.contains('share-whatsapp')) {
+            const url = `httpsas://wa.me/?text=${encodeURIComponent(postCaption + '\n' + postUrl)}`;
+            window.open(url, '_blank');
+        } else if (btn.classList.contains('share-twitter')) {
+            const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(postCaption)}&url=${encodeURIComponent(postUrl)}`;
+            window.open(url, '_blank');
+        }
+        
+        if (menu) { 
+            menu.classList.remove('show'); 
+            menu.setAttribute('aria-hidden', 'true'); 
+        }
+    });
 
 })();
