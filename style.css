@@ -143,19 +143,6 @@ overflow: hidden; /* Only the designated section will scroll */
             padding: 10px 0;
             position: relative;
         }
-
-        /* Nav Underline (The bar which comes when hovering in teh menubar) - PREMIUM GLOW */
-        .nav-underline {
-            position: absolute;
-            left: 0;
-            width: 8px; /* Thicker bar */
-            height: 0; 
-            background: var(--primary-gradient);
-            box-shadow: 0 0 8px var(--primary-color), 0 0 15px var(--secondary-color); /* Strong glow */
-            border-radius: 4px;
-            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), height 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            z-index: 10;
-        }
         
         .nav-item {
             padding: 15px 20px 15px 30px; 
@@ -611,68 +598,3 @@ overflow: hidden; /* Only the designated section will scroll */
 .share-menu button:hover {
     background-color: rgba(255, 255, 255, 0.1); /* Add a hover effect */
 }
-/* --- NEW Heart Animation Rules --- */
-.heart-animation-overlay {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 100px; /* Base size */
-    opacity: 0;
-    pointer-events: none;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 200px; /* Container size */
-    height: 200px;
-}
-
-.heart-animation-overlay.show .heart-particle {
-    animation: heartPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-.heart-particle {
-    transform: scale(0);
-    opacity: 0;
-    color: var(--secondary-color);
-    text-shadow: 0 0 18px rgba(255, 65, 108, 0.9);
-    font-size: 1.2em; /* Make heart 120px */
-    z-index: 2;
-}
-
-.star-particle {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    font-size: 0.25em; /* Stars are 25px */
-    opacity: 0;
-    color: #ffd700;
-    transform: translate(-50%, -50%) scale(0.5);
-    z-index: 1;
-}
-
-.heart-animation-overlay.show .star-particle {
-    animation: starBurst 0.8s ease-out forwards;
-}
-
-/* --- Keyframe Animations --- */
-@keyframes heartPop {
-    0% { transform: scale(0); opacity: 0.5; }
-    30% { transform: scale(1.4); opacity: 1; }
-    60% { transform: scale(1.2); opacity: 1; }
-    100% { transform: scale(1.2); opacity: 0; }
-}
-
-/* This keyframe defines the star's final, exploded position */
-@keyframes starBurst {
-    0% { opacity: 0.8; transform: translate(-50%, -50%) scale(0.5); }
-    100% { opacity: 0; transform: translate(var(--tx, -50%), var(--ty, -50%)) scale(1.5) rotate(360deg); }
-}
-
-/* Define the final --tx and --ty (translate X/Y) for each star */
-.heart-animation-overlay.show .star-1 { animation-delay: 0.1s; --tx: -50%; --ty: -180%; } /* Up */
-.heart-animation-overlay.show .star-2 { animation-delay: 0.15s; --tx: 80%; --ty: -80%; } /* Top-right */
-.heart-animation-overlay.show .star-3 { animation-delay: 0.2s; --tx: 120%; --ty: 100%; } /* Bottom-right */
-.heart-animation-overlay.show .star-4 { animation-delay: 0.25s; --tx: -150%; --ty: 100%; } /* Bottom-left */
-.heart-animation-overlay.show .star-5 { animation-delay: 0.3s; --tx: -130%; --ty: -80%; } /* Top-left */
