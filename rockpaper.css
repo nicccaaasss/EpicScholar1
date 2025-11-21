@@ -1,0 +1,469 @@
+:root {
+    /* Updated Gradients: Vibrant Blue to Pink */
+    --bg-gradient-stops: #0072ff, #ff416c, #0072ff, #ff416c;
+
+    --bg-light: linear-gradient(135deg, var(--bg-gradient-stops));
+    --bg-dark: linear-gradient(135deg, var(--bg-gradient-stops));
+
+    --text-light: #222;
+    --text-dark: #eee;
+    --container-light: rgba(255, 255, 255, 0.9);
+    --container-dark: rgba(30, 30, 30, 0.9);
+    
+    /* iOS Polish Variables */
+    --primary: #0072ff;
+    --accent: #ff416c;
+    --blur: blur(20px);
+    --card-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    --pop-shadow: 0 20px 40px rgba(0,0,0,0.25);
+    --pop-transform: translateY(-4px) scale(1.02);
+    --transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Moving Gradient Animation */
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+body {
+    font-family: 'Google Sans', 'Segoe UI', sans-serif;
+    background: var(--bg-light);
+    background-size: 400% 400%;
+    animation: gradientMove 12s ease infinite;
+    color: var(--text-light);
+    text-align: center;
+    height: 100vh;
+    overflow: hidden;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    transition: color 0.5s ease;
+}
+
+body.dark-mode {
+    background: var(--bg-dark);
+    background-size: 400% 400%;
+    color: var(--text-dark);
+}
+
+/* UI Controls */
+.ui-controls-top {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 12px;
+    z-index: 100;
+}
+
+.icon-btn {
+    background: var(--container-light);
+    border: none;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    color: var(--primary);
+}
+
+.dark-mode .icon-btn {
+    background: var(--container-dark);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.icon-btn:hover {
+    transform: scale(1.1) rotate(10deg);
+}
+
+/* Main Container */
+.game-container {
+    background: var(--container-light);
+    padding: 2.5rem;
+    border-radius: 2rem;
+    box-shadow: var(--card-shadow);
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    transition: transform 0.3s ease, background 0.3s;
+}
+
+.dark-mode .game-container {
+    background: var(--container-dark);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+/* Title with Gradient Text */
+.game-title {
+    margin-top: 0;
+    font-weight: 800;
+    font-size: 2.2rem;
+    background: linear-gradient(135deg, #0072ff, #ff416c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.5px;
+}
+
+/* Settings Panel */
+.settings {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.setting-group {
+    text-align: left;
+}
+
+.setting-group label {
+    display: block;
+    font-weight: 800;
+    margin-bottom: 0.8rem;
+    font-size: 1rem; /* Increased size */
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    /* Dominant Gradient for Labels */
+    background: linear-gradient(135deg, #0072ff, #ff416c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.dark-mode .setting-group label {
+    background: linear-gradient(135deg, #4ca2ff, #ff8ba7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Professional Bold Input Box */
+.pop-input {
+    width: 100%;
+    padding: 18px;
+    border-radius: 16px;
+    border: 3px solid rgba(0, 114, 255, 0.1); 
+    background: #ffffff;
+    font-family: 'Google Sans', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    text-align: center;
+    color: var(--primary);
+    transition: var(--transition);
+    box-sizing: border-box;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
+
+.dark-mode .pop-input {
+    background: rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.pop-input:focus {
+    transform: scale(1.02);
+    border-color: var(--accent);
+    box-shadow: 0 8px 24px rgba(255, 65, 108, 0.25);
+    outline: none;
+}
+
+.difficulty-selector {
+    display: flex;
+    gap: 10px;
+}
+
+.diff-btn {
+    flex: 1;
+    padding: 14px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+    background: transparent;
+    cursor: pointer;
+    font-weight: 700;
+    transition: var(--transition);
+    color: #888;
+}
+
+.dark-mode .diff-btn {
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #aaa;
+}
+
+.diff-btn.selected {
+    background: linear-gradient(135deg, #0072ff, #0056c7);
+    color: white;
+    border-color: transparent;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 114, 255, 0.3);
+}
+
+/* Main Buttons */
+.btn {
+    padding: 18px;
+    border: none;
+    border-radius: 18px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: var(--transition);
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    box-sizing: border-box;
+    letter-spacing: 0.5px;
+}
+
+.primary-btn {
+    background: linear-gradient(135deg, #0072ff, #ff416c);
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 114, 255, 0.3);
+}
+
+.primary-btn:hover {
+    transform: var(--pop-transform);
+    box-shadow: 0 10px 25px rgba(255, 65, 108, 0.4);
+}
+
+.secondary-btn {
+    background: transparent;
+    border: 2px solid var(--accent); 
+    color: var(--accent);
+    margin-top: 10px;
+}
+
+.secondary-btn:hover {
+    background: var(--accent);
+    color: white;
+    transform: var(--pop-transform);
+    box-shadow: 0 10px 20px rgba(255, 65, 108, 0.3);
+}
+
+/* Toggle Switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px; width: 26px;
+    left: 4px; bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider { background-color: var(--primary); }
+input:checked + .slider:before { transform: translateX(26px); }
+
+/* Game Area */
+.scoreboard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.score-box {
+    background: rgba(255,255,255,0.1);
+    padding: 1rem;
+    border-radius: 1rem;
+    min-width: 90px;
+}
+
+.score-box p {
+    font-weight: 600;
+    margin: 0;
+    color: #888;
+}
+
+.dark-mode .score-box p {
+    color: #aaa;
+}
+
+.score-number {
+    font-size: 2.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #0072ff, #ff416c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.badge {
+    font-size: 0.7rem;
+    background: linear-gradient(135deg, #0072ff, #ff416c);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 6px;
+    vertical-align: middle;
+    font-weight: bold;
+}
+
+.timer-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-weight: 800;
+    color: var(--accent);
+    font-size: 1.1rem;
+}
+
+/* Hands Animation Stage */
+.hands-stage {
+    display: flex;
+    justify-content: space-between;
+    margin: 2rem 0;
+    height: 150px;
+    align-items: center;
+}
+
+.hand {
+    font-size: 5rem;
+    display: block;
+    transition: transform 0.2s;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+}
+
+#playerHand { transform: rotate(90deg); }
+#computerHand { transform: rotate(-90deg) scaleX(-1); }
+
+/* Shake Animation */
+.shake-player { animation: shakePlayer 1.5s ease; }
+.shake-computer { animation: shakeComputer 1.5s ease; }
+
+@keyframes shakePlayer {
+    0% { transform: rotate(90deg) translateY(0); }
+    25% { transform: rotate(90deg) translateY(-20px); }
+    50% { transform: rotate(90deg) translateY(0); }
+    75% { transform: rotate(90deg) translateY(-20px); }
+    100% { transform: rotate(90deg) translateY(0); }
+}
+
+@keyframes shakeComputer {
+    0% { transform: rotate(-90deg) scaleX(-1) translateY(0); }
+    25% { transform: rotate(-90deg) scaleX(-1) translateY(-20px); }
+    50% { transform: rotate(-90deg) scaleX(-1) translateY(0); }
+    75% { transform: rotate(-90deg) scaleX(-1) translateY(-20px); }
+    100% { transform: rotate(-90deg) scaleX(-1) translateY(0); }
+}
+
+/* Choice Buttons */
+.choices {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.choice-btn {
+    background: var(--container-light);
+    border: 2px solid transparent;
+    border-radius: 24px;
+    padding: 16px;
+    width: 110px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.dark-mode .choice-btn {
+    background: rgba(255,255,255,0.05);
+}
+
+.choice-btn:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 114, 255, 0.15);
+    border-color: var(--primary);
+}
+
+.choice-btn .emoji {
+    font-size: 2.5rem;
+    margin-bottom: 8px;
+}
+
+.choice-btn span {
+    font-weight: 700;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.dark-mode .choice-btn span {
+    color: #ccc;
+}
+
+/* Overlay */
+.overlay-result {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 200;
+    animation: fadeIn 0.5s;
+}
+
+.result-card {
+    background: var(--container-light);
+    padding: 3rem;
+    border-radius: 2.5rem;
+    text-align: center;
+    animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.final-message {
+    background: linear-gradient(135deg, #0072ff, #ff416c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 2.5rem;
+    margin: 10px 0;
+}
+
+#result-emoji { font-size: 4rem; margin-bottom: 1rem; }
+
+.hidden { display: none !important; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* Canvas Fireworks */
+#fireworks {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 150;
+}

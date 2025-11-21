@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rock Paper Scissors - Enhanced</title>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700;800&family=Material+Icons&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="rockpaper.css" />
+</head>
+<body>
+  
+  <!-- Top Controls -->
+  <div class="ui-controls-top">
+    <button class="icon-btn" onclick="toggleMusic()" id="music-btn" title="Toggle Music">
+      <span class="material-icons">music_note</span>
+    </button>
+    <button class="mode-toggle icon-btn" onclick="toggleMode()" title="Switch Theme">
+      <span class="material-icons">brightness_6</span>
+    </button>
+  </div>
+
+  <div class="game-container">
+    <h1 class="game-title">Rock Paper Scissors</h1>
+    
+    <!-- Settings Panel -->
+    <div class="settings" id="settings-panel">
+      <div class="setting-group">
+        <label>Target Score (Max 10)</label>
+        <input type="number" id="targetPoints" min="1" max="10" value="5" class="pop-input"/>
+      </div>
+      
+      <div class="setting-group">
+        <label>Difficulty</label>
+        <div class="difficulty-selector">
+          <button class="diff-btn selected" onclick="setDifficulty('easy')">Easy</button>
+          <button class="diff-btn" onclick="setDifficulty('medium')">Medium</button>
+          <button class="diff-btn" onclick="setDifficulty('hard')">Hard</button>
+        </div>
+      </div>
+
+      <div class="setting-group">
+        <label>Timer Mode (10s Limit)</label>
+        <label class="switch">
+          <input type="checkbox" id="timerToggle" checked>
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <button id="startGame" class="btn primary-btn">Start Game</button>
+      <a href="activity.html" class="exit btn secondary-btn">Exit</a>
+    </div>
+
+    <!-- Active Game Area -->
+    <div id="game-area" class="hidden">
+      
+      <div class="scoreboard">
+        <div class="score-box player">
+          <p>You</p>
+          <div class="score-number" id="playerScore">0</div>
+        </div>
+        
+        <div class="timer-display hidden" id="timer-display">
+          <span class="material-icons">timer</span>
+          <span id="time-left">10</span>s
+        </div>
+
+        <div class="score-box computer">
+          <p>Bot <span class="badge" id="bot-badge">Easy</span></p>
+          <div class="score-number" id="computerScore">0</div>
+        </div>
+      </div>
+
+      <!-- Animation Stage -->
+      <div class="hands-stage">
+        <div class="hand-container">
+          <span class="hand" id="playerHand">✊</span>
+        </div>
+        <div class="hand-container">
+          <span class="hand" id="computerHand">✊</span>
+        </div>
+      </div>
+
+      <div class="message-area">
+        <h2 id="round-status">Choose your weapon!</h2>
+      </div>
+
+      <div class="choices">
+        <button class="choice-btn" data-choice="rock">
+          <div class="emoji">✊</div>
+          <span>Rock</span>
+        </button>
+        <button class="choice-btn" data-choice="paper">
+          <div class="emoji">📄</div>
+          <span>Paper</span>
+        </button>
+        <button class="choice-btn" data-choice="scissors">
+          <div class="emoji">✂️</div>
+          <span>Scissors</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Result Overlay -->
+  <div id="overlay" class="overlay-result hidden">
+    <div class="result-card">
+      <div id="result-emoji">🏆</div>
+      <h2 class="final-message" id="finalMessage">You Won!</h2>
+      <p id="final-score">5 - 3</p>
+      <button class="btn primary-btn" onclick="location.reload()">Play Again</button>
+    </div>
+  </div>
+
+  <!-- Canvas for Fireworks -->
+  <canvas id="fireworks"></canvas>
+
+  <!-- Audio Assets -->
+  <audio id="bgm" src="sounds/bgm.mp3" loop></audio>
+  <audio id="winSound" src="sounds/win.mp3"></audio>
+  <audio id="loseSound" src="sounds/lose.mp3"></audio>
+  <audio id="clickSound" src="sounds/click.mp3"></audio>
+  <audio id="gameOverSound" src="sounds/gameover.mp3"></audio>
+  <audio id="timerSound" src="sounds/timer.mp3"></audio>
+
+  <script src="rockpaper.js"></script>
+</body>
+</html>
