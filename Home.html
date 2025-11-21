@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EpicScholar Liquid Glass SPA</title>
+    <title>EpicScholar | Home</title>
     <link rel="stylesheet" href="styles.css">
     <style>
         .mini-card .mini-content {
@@ -311,6 +311,176 @@
   transform: scale(0.98);
   background: linear-gradient(135deg, #407cfa, #ff416c 95%);
 }
+.settings-wrap {
+    position: absolute;
+    bottom: 50px;
+    width: 100%;
+    text-align: left;
+}
+/* --- New Rule for Simple Refresh Button --- */
+#refreshBtn {
+    background: var(--secondary-glass);
+    color: var(--text-color);
+    width: 54px;  /* Fixed size for a circle */
+    height: 54px;
+    padding: 0;
+    border-radius: 50%; /* Make it circular */
+    border: 1px solid var(--card-glass-border);
+    cursor: pointer;
+    font-size: 24px;   /* Larger icon */
+    font-weight: bold;
+    box-shadow: var(--shadow-light);
+    transition: transform 0.2s, opacity 0.2s, background 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#refreshBtn:hover {
+    background: var(--card-glass-bg);
+    box-shadow: var(--shadow-deep);
+    transform: translateY(-2px);
+}
+
+#refreshBtn:active {
+    transform: translateY(0);
+    opacity: 0.8;
+}
+/* --- UPDATED Rules for Share Menu Animation & Styling --- */
+
+/* Base styles for the menu (hidden state) */
+.share-menu {
+    /* --- Animation Properties --- */
+    opacity: 0; 
+    transform: scale(0.8) translateY(10px); /* Start scaled down and slightly up */
+    transform-origin: bottom right; /* Emerge from bottom-right corner */
+    pointer-events: none; 
+    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    /* --- Styling Properties --- */
+    padding: 8px; /* Sleeker padding */
+    width: 180px; /* Give it a consistent width */
+    box-sizing: border-box;
+    
+    /* --- Other properties from your HTML style tag --- */
+    position: absolute; 
+    bottom: 55px; 
+    right: 0; 
+    background: var(--card-glass-bg); 
+    backdrop-filter: blur(15px); 
+    border: 1px solid var(--card-glass-border); 
+    border-radius: 12px; 
+    box-shadow: var(--shadow-deep); 
+    display: flex; 
+    flex-direction: column; 
+    z-index: 1200;
+}
+
+/* Visible state for the menu */
+.share-menu.show {
+    opacity: 1; 
+    pointer-events: auto; 
+    transform: scale(1) translateY(0); /* Animate to full size and original position */
+    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: absolute;
+    left: 100px;
+}
+
+/* Base styles for buttons inside the menu */
+.share-menu button {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    padding: 10px 14px; /* Consistent padding */
+    text-align: left;
+    border-radius: 8px;
+    cursor: pointer;
+    
+    /* --- Enhancements --- */
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between icon and text */
+    font-weight: 500;
+    width: 100%;
+    box-sizing: border-box;
+    transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+/* Hover state for menu buttons */
+.share-menu button:hover { 
+    background-color: var(--secondary-glass); /* Use a glass variable */
+    transform: translateX(-3px); /* "Lift" effect */
+}
+
+/* Active (click) state for menu buttons */
+.share-menu button:active {
+    transform: translateX(0); /* Return to original position */
+    opacity: 0.8;
+    transition-duration: 0.05s; /* Make the click feel instant */
+}
+/* --- NEW Rules for Video Volume Controls --- */
+.volume-container {
+    display: flex;
+    align-items: center;
+}
+
+.volume-slider {
+    /* Hide the slider by default */
+    width: 0;
+    max-width: 0;
+    opacity: 0;
+    margin-left: 0;
+    transition: max-width 0.3s ease, opacity 0.2s ease, margin-left 0.3s ease;
+    cursor: pointer;
+    /* Remove default browser styles for a cleaner look */
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent; /* Hide the track */
+    height: 18px; /* Taller hit area */
+}
+
+/* Show the slider when hovering over the container */
+.volume-container:hover .volume-slider {
+    max-width: 80px; /* Expand to this width */
+    opacity: 1;
+    margin-left: 5px;
+}
+
+/* --- Styling the slider THUMB --- */
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 0 2px rgba(0,0,0,0.5);
+    margin-top: -5px; /* Center thumb on the track */
+}
+
+.volume-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 0 2px rgba(0,0,0,0.5);
+    border: none;
+}
+
+/* --- Styling the slider TRACK --- */
+.volume-slider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 3px;
+}
+
+.volume-slider::-moz-range-track {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 3px;
+}
 
     </style>
 </head>
@@ -348,12 +518,12 @@
             <div class="nav-item" data-view="self-study" data-icon="📖">📖 Self-Study</div>
             <div class="nav-item" data-view="edubot" data-icon="🤖">🤖 EduBot</div>
             <div class="nav-item" data-view="mini-games" data-icon="🎮">🎮 Mini-Games</div>
-            <div class="nav-item" data-view="profile" data-icon="👤">👤 Profile</div>
+
         </div>
         
         <!-- Settings (Located at the end) -->
         <div class="settings-wrap">
-            <div class="nav-item" data-view="settings" data-icon="⚙️">⚙️ Settings</div>
+          <div class="nav-item" data-view="profile" data-icon="👤">👤 Profile</div>
         </div>
     </div>
 
@@ -369,7 +539,7 @@
                 <!-- Search & Refresh Container (Glass) -->
                 <div id="searchContainer" class="glass-element" style="padding: 15px; border-radius: 18px; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; background: rgba(50, 50, 50, 0.4);">
                     <input type="search" id="searchBar" placeholder="Search posts or users..." style="flex-grow: 1; padding: 15px 25px; border-radius: 30px;; background-color: var(--bg-color); color: var(--text-color); font-size: 17px; transition: border-color 0.3s, box-shadow 0.3s;">
-                    <button id="refreshBtn" style="background: var(--primary-gradient); color: white; padding: 15px 20px; border-radius: 30px; border: none; cursor: pointer; font-size: 18px; font-weight: bold; box-shadow: var(--shadow-deep); transition: transform 0.2s, opacity 0.2s;">🔄</button>
+                    <button id="refreshBtn" title="Refresh Feed">🔄</button>
                 </div>
 
                 <!-- Feed Box -->
@@ -468,12 +638,6 @@
   <span id="imageModalClose" class="modal-close-btn">&#10005;</span>
   <img id="modalImage" src="" alt="Enlarged image" />
 </div>
-
-    <!-- 
-        ============================================================
-        2. JAVASCRIPT LOGIC AND FUNCTIONALITY (800+ LINES)
-        ============================================================
-    -->
-    <script src="script.js"></script>
+<script href = "script.js"></script>
 </body>
 </html>
