@@ -435,7 +435,11 @@
     /* Remove default browser styles for a cleaner look */
     -webkit-appearance: none;
     appearance: none;
-    background: transparent; /* Hide the track */
+        /* ... existing styles ... */
+    
+    /* Set initial fill (100% volume) */
+    /* This gradient will be updated by JavaScript */
+    background: linear-gradient(to right, var(--primary-color) 100%, rgba(255, 255, 255, 0.4) 100%);
     height: 18px; /* Taller hit area */
 }
 
@@ -444,44 +448,393 @@
     max-width: 80px; /* Expand to this width */
     opacity: 1;
     margin-left: 5px;
+    height: 10px;
+    width: 80px;
+    background: linear-gradient(to right, var(--primary-gradient) 45%, rgba(255, 255, 255, 0.4) 45%);
+    border-radius: 10px;
 }
 
-/* --- Styling the slider THUMB --- */
-.volume-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: #ffffff;
-    box-shadow: 0 0 2px rgba(0,0,0,0.5);
-    margin-top: -5px; /* Center thumb on the track */
+/* --- NEW: Entry Animations --- */
+@keyframes slideInDown {
+    from { transform: translateY(-100px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+@keyframes slideInLeft {
+    from { transform: translateX(-100px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideInRight {
+    from { transform: translateX(100px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-.volume-slider::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: #ffffff;
-    box-shadow: 0 0 2px rgba(0,0,0,0.5);
-    border: none;
+/* Apply animations to the main layout elements */
+.header {
+    /* ... existing styles ... */
+    animation: slideInDown 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+.sidebar {
+    /* ... existing styles ... */
+    animation: slideInLeft 0.7s 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    opacity: 0; /* Start hidden */
+}
+#right-panel-wrapper {
+    /* ... existing styles ... */
+    animation: slideInRight 0.7s 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    opacity: 0; /* Start hidden */
 }
 
-/* --- Styling the slider TRACK --- */
+/* Animate search and feed on home page */
+#searchContainer {
+    animation: fadeIn 0.8s 0.6s ease-out forwards;
+    opacity: 0;
+}
+#feed {
+    animation: fadeIn 0.8s 0.8s ease-out forwards;
+    opacity: 0; /* Start hidden, JS/CSS animation will show it */
+}
+
+/* 2. Make the native track transparent so the element's background shows through */
 .volume-slider::-webkit-slider-runnable-track {
-    width: 100%;
+    background: transparent; /* Track must be transparent */
     height: 4px;
-    background: rgba(255, 255, 255, 0.4);
     border-radius: 3px;
 }
 
 .volume-slider::-moz-range-track {
-    width: 100%;
+    background: transparent; /* Track must be transparent */
     height: 4px;
-    background: rgba(255, 255, 255, 0.4);
     border-radius: 3px;
 }
 
+/* 3. (Optional) Tweak thumb to look better on the gradient */
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px; /* Slightly larger */
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 4px rgba(0,0,0,0.8);
+  margin-top: -6px; /* Re-center on the 4px track */
+  border: 2px solid #fff;
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 4px rgba(0,0,0,0.8);
+  border: 2px solid #fff;
+}
+
+/* --- FIX: Modal Close Animation (Modify This) --- */
+/* Find your existing rule and *remove* the 'transform' property */
+.image-modal .modal-image-animate-out {
+  opacity: 0;
+  /* transform: scale(0.7) translateZ(0); */ /* <-- DELETE THIS LINE */
+  transition:
+    border-radius 0.27s cubic-bezier(.61,-0.13,.43,1.38),
+    box-shadow 0.16s,
+    opacity 0.22s,
+    transform 0.57s cubic-bezier(.16,1.59,.19,.99);
+}
+
+/* --- Entry Animations & Volume Slider (Add if missing) --- */
+@keyframes slideInDown {
+    from { transform: translateY(-100px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+@keyframes slideInLeft {
+    from { transform: translateX(-100px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideInRight {
+    from { transform: translateX(100px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.header {
+    animation: slideInDown 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+.sidebar {
+    animation: slideInLeft 0.7s 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    opacity: 0; 
+}
+#right-panel-wrapper {
+    animation: slideInRight 0.7s 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    opacity: 0; 
+}
+#searchContainer {
+    animation: fadeIn 0.8s 0.6s ease-out forwards;
+    opacity: 0;
+}
+#feed {
+    animation: fadeIn 0.8s 0.8s ease-out forwards;
+    opacity: 0; 
+}
+.volume-slider {
+    background: linear-gradient(to right, var(--primary-color) 100%, rgba(255, 255, 255, 0.4) 100%);
+}
+.volume-slider::-webkit-slider-runnable-track {
+    background: transparent;
+    height: 4px;
+    border-radius: 3px;
+}
+.volume-slider::-moz-range-track {
+    background: transparent;
+    height: 4px;
+    border-radius: 3px;
+}
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px; 
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 4px rgba(0,0,0,0.8);
+  margin-top: -6px;
+  border: 2px solid #fff;
+}
+.volume-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 4px rgba(0,0,0,0.8);
+  border: 2px solid #fff;
+}
+/* --- NEW: Entry Animations --- */
+@keyframes slideInDown {
+    from { transform: translateY(-100px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+@keyframes slideInLeft {
+    from { transform: translateX(-100px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideInRight {
+    from { transform: translateX(100px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Apply animations to the main layout elements */
+.header {
+    animation: slideInDown 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+.sidebar {
+    animation: slideInLeft 0.7s 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    opacity: 0; /* Start hidden */
+}
+#right-panel-wrapper {
+    animation: slideInRight 0.7s 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    opacity: 0; /* Start hidden */
+}
+#searchContainer {
+    animation: fadeIn 0.8s 0.6s ease-out forwards;
+    opacity: 0;
+}
+#feed {
+    /* Opacity is handled by JS/CSS combination */
+    animation: fadeIn 0.8s 0.8s ease-out forwards;
+    opacity: 0; 
+}
+
+
+/* --- NEW: Gradient Volume Slider (JS-Driven) --- */
+.volume-slider {
+    /* Set initial fill (100% volume) */
+    background: linear-gradient(to right, var(--primary-color) 100%, rgba(255, 255, 255, 0.4) 100%);
+}
+.volume-slider::-webkit-slider-runnable-track {
+    background: transparent; /* Track must be transparent */
+    height: 4px;
+    border-radius: 3px;
+}
+.volume-slider::-moz-range-track {
+    background: transparent; /* Track must be transparent */
+    height: 4px;
+    border-radius: 3px;
+}
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px; 
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 4px rgba(0,0,0,0.8);
+  margin-top: -6px; /* Re-center on the 4px track */
+  border: 2px solid #fff;
+}
+.volume-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 4px rgba(0,0,0,0.8);
+  border: 2px solid #fff;
+}
+.nav-wrap {
+    position: relative;
+    bottom: 50px;
+}
+
+.nav-item {
+    padding: 15px 20px 15px 30px; 
+    margin: 8px 10px;
+    font-weight: 500;
+    color: var(--text-color);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    cursor: pointer;
+    border-radius: 12px;
+}
+.nav-item.active {
+    color: var(--secondary-color);
+    font-weight: 700;
+}
+
+
+/* --- 2. MODIFY: Page Transition Animation --- */
+/* (Replace your old .view-section rules with these) */
+
+.view-section {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    
+    /* Base (Hidden) State */
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(30px); /* Start slightly to the right */
+    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+}
+
+/* Active (Visible) State */
+.view-section.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0); /* Slide in to center */
+    transition-delay: 0.2s; /* Wait for exit to mostly finish */
+    z-index: 5;
+}
+
+/* NEW: Exit State */
+.view-section.exit {
+    opacity: 0;
+    pointer-events: auto; /* Keep clickable during exit */
+    transform: translateX(-30px); /* Slide out to the left */
+    transition: opacity 0.3s ease-in, transform 0.3s ease-in;
+    z-index: 4; /* Keep it below the new active view */
+}
+.image-modal .modal-image-animate-out {
+  opacity: 0;
+  transition:
+    border-radius 0.27s cubic-bezier(.61,-0.13,.43,1.38),
+    box-shadow 0.16s,
+    opacity 0.22s,
+    transform 0.57s cubic-bezier(.16,1.59,.19,.99);
+}
+.post.post-enter {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+    max-height: 0;
+    overflow: hidden;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+.post.post-enter-active {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    max-height: 1000px; /* Set to a large value */
+    margin-bottom: 30px;
+    padding-top: 25px;
+    padding-bottom: 25px;
+    transition: opacity 0.4s ease, 
+                transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                max-height 0.6s ease-out,
+                margin-bottom 0.4s ease-out,
+                padding-top 0.4s ease-out,
+                padding-bottom 0.4s ease-out;
+}
+/* --- Styling for the Menubar Wrappers --- */
+.nav-wrap {
+    padding: 10px 0;
+    position: relative;
+}
+
+.settings-wrap {
+    position: absolute;
+    bottom: 100px;
+    width: 100%;
+    text-align: left;
+}
+
+/* --- Styling for the Nav Items (<a> tags) --- */
+.nav-item {
+    padding: 15px 20px 15px 30px; 
+    margin: 8px 10px;
+    font-weight: 500;
+    color: var(--text-color);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    top: 50px;
+    cursor: pointer;
+    border-radius: 12px;
+    
+    /* This makes the <a> tags behave like the original <div>s */
+    display: block; 
+    text-decoration: none; 
+}
+
+/* --- Hover Effect (for all items) --- */
+.nav-item:hover {
+    background-color: var(--secondary-glass);
+    transform: scale(1.05); /* Aggressive lift animation */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* * --- Active Text Effect (for the current page) --- 
+ * The JavaScript 'setActiveNav()' function will automatically
+ * add the .active class to the link of the page you are on.
+*/
+.nav-item-active {
+    background-color: var(--secondary-glass);
+    color:  #ff416c;
+    font-weight: 700;
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    padding: 15px 20px 15px 30px; 
+    margin: 8px 10px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    top: 50px;
+    cursor: pointer;
+    border-radius: 12px;
+    display: block; 
+    text-decoration: none; 
+}
     </style>
 </head>
 <body>
@@ -507,26 +860,19 @@
         </div>
     </div>
 
-    <!-- Left Sidebar (Glass) - Fixed Left Layer -->
-    <div class="sidebar glass-element fixed-top-layer">
-        <!-- Main Navigation Items -->
+<div class="sidebar glass-element fixed-top-layer">
         <div class="nav-wrap" id="navWrap">
-            <div class="nav-underline" id="navUnderline"></div>
-            <!-- Added data-icon for mobile view -->
-            <div class="nav-item active" data-view="home" data-icon="🏠">🏠 Home </div>
-            <div class="nav-item" data-view="messages" data-icon="✉️">✉️ Messages</div>
-            <div class="nav-item" data-view="self-study" data-icon="📖">📖 Self-Study</div>
-            <div class="nav-item" data-view="edubot" data-icon="🤖">🤖 EduBot</div>
-            <div class="nav-item" data-view="mini-games" data-icon="🎮">🎮 Mini-Games</div>
-
+            <a class="nav-item-active" href="index.html" data-icon="🏠">🏠 Home </a>
+            <a class="nav-item" href="messages.html" data-icon="✉️">✉️ Messages</a>
+            <a class="nav-item" href="self-study.html" data-icon="📖">📖 Self-Study</a>
+            <a class="nav-item" href="edubot.html" data-icon="🤖">🤖 EduBot</a>
+            <a class="nav-item" href="mini-games.html" data-icon="🎮">🎮 Mini-Games</a>
         </div>
         
-        <!-- Settings (Located at the end) -->
         <div class="settings-wrap">
-          <div class="nav-item" data-view="profile" data-icon="👤">👤 Profile</div>
+            <a class="nav-item" href="profile.html" data-icon="👤">👤 Profile</a>
         </div>
     </div>
-
     <!-- MAIN CENTRAL CONTENT CONTAINER -->
     <div id="main-content-wrapper">
         
