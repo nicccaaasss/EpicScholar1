@@ -1,5 +1,5 @@
 /* -------------------------------------------
-   CORE SETUP AND THEME
+    CORE SETUP AND THEME
 ------------------------------------------- */
 const THEME_KEY = 'epicScholarTheme';
 const root = document.documentElement;
@@ -31,7 +31,7 @@ function showFeedback(message) {
 }
 
 /* -------------------------------------------
-   DATA / MOCK POSTS
+    DATA / MOCK POSTS
 ------------------------------------------- */
 const state = {
     posts: [],
@@ -78,7 +78,7 @@ function createMockPosts() {
 createMockPosts();
 
 /* -------------------------------------------
-   VIEW SWITCHING
+    VIEW SWITCHING
 ------------------------------------------- */
 const allNavItems = document.querySelectorAll('.sidebar .nav-item');
 const allViewSections = document.querySelectorAll('.view-section');
@@ -102,7 +102,7 @@ function switchView(viewName) {
 }
 
 /* -------------------------------------------
-   FEED RENDERING / HELPERS
+    FEED RENDERING / HELPERS
 ------------------------------------------- */
 const feed = document.getElementById('feed');
 function escapeHtml(s){return String(s).replace(/[&"'<>]/g,c=>({"&":"&amp;","\"":"&quot;","'":"&#39;","<":"&lt;",">":"&gt;"}[c]))}
@@ -111,13 +111,14 @@ function formatTime(seconds) {const minutes = Math.floor(seconds / 60);const rem
 /**
  * Correct mapping from reaction arrays to counters
  */
-const reactionMap = { likedBy: 'likes', lovedBy: 'loves' };
+// We only have 'love' now, but we'll keep the map structure
+const reactionMap = { lovedBy: 'loves' };
 
 function createPostEl(post){
     const el=document.createElement('article');el.className='post';
     el.dataset.id = post.id;
     const authorName = post.authorId === state.currentUser.id ? 'You' : escapeHtml(post.author);
-    const isLiked = (post.likedBy || []).includes(state.currentUser.id);
+    // const isLiked = (post.likedBy || []).includes(state.currentUser.id); // REMOVED
     const isLoved = (post.lovedBy || []).includes(state.currentUser.id);
 
     let mediaContent = '';
@@ -133,13 +134,17 @@ function createPostEl(post){
                     <div class="controls-bar" style="display:flex; justify-content:space-between; align-items:center; padding:5px 0; color:white;">
                         <button class="control-btn play-pause-btn" style="background:none; border:none; color:white; font-size:20px; cursor:pointer; transition: transform 0.1s;">▶</button>
                         <div style="display:flex; align-items:center; gap:6px;">
-                          <div class="time-display current-time" style="font-size:13px;">0:00</div>
-                          <div class="time-display separator" style="font-size:13px; opacity:0.7;">/</div>
-                          <div class="time-display duration" style="font-size:13px;">0:00</div>
+                            <div class="time-display current-time" style="font-size:13px;">0:00</div>
+                            <div class="time-display separator" style="font-size:13px; opacity:0.7;">/</div>
+                            <div class="time-display duration" style="font-size:13px;">0:00</div>
                         </div>
                         <div style="display:flex; align-items:center; gap:10px;">
-                          <button class="control-btn mute-btn" style="background:none; border:none; color:white; font-size:18px; cursor:pointer;">🔊</button>
-                          <button class="control-btn full-screen-btn" style="background:none; border:none; color:white; font-size:18px; cursor:pointer;">⛶</button>
+                            <!-- UPDATED: Added Volume Container & Slider -->
+                            <div class="volume-container">
+                                <button class="control-btn mute-btn" style="background:none; border:none; color:white; font-size:18px; cursor:pointer;">🔊</button>
+                                <input type="range" class="volume-slider" min="0" max="1" step="0.05" value="1" style="width: 80px; margin-left: 5px;">
+                            </div>
+                            <button class="control-btn full-screen-btn" style="background:none; border:none; color:white; font-size:18px; cursor:pointer;">⛶</button>
                         </div>
                     </div>
                 </div>
@@ -160,50 +165,60 @@ function createPostEl(post){
         <div class="text-wrapping" style="margin-bottom: 20px; line-height: 1.6;">${escapeHtml(post.caption)}</div>
         <div class="media" data-id="${post.id}" style="border-radius: 12px; overflow: hidden; position: relative; height: 350px; margin-bottom: 20px; background-color: var(--secondary-glass); transition: all 0.24s;">
             ${mediaContent}
-            <div class="thumb-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9); font-size: 80px; opacity: 0; pointer-events: none; color: var(--primary-color); text-shadow: 0 0 15px rgba(0, 114, 255, 0.8); transition: transform 0.32s cubic-bezier(.2,.9,.2,1), opacity 0.22s;">👍</div>
-            <div class="heart-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9); font-size: 90px; opacity: 0; pointer-events: none; color: var(--secondary-color); text-shadow: 0 0 18px rgba(255, 65, 108, 0.9); transition: transform 0.34s cubic-bezier(.2,.9,.2,1), opacity 0.22s;">❤️</div>
+            <!-- Like/Thumb overlay removed -->
+            
+            <!-- UPDATED: New Heart Animation Overlay -->
+            <div class="heart-animation-overlay">
+                <span class="heart-particle">❤️</span>
+                <span class="star-particle star-1">✨</span>
+                <span class="star-particle star-2">🌟</span>
+                <span class="star-particle star-3">💫</span>
+                <span class="star-particle star-4">✨</span>
+                <span class="star-particle star-5">🌟</span>
+            </div>
         </div>
         <div class="actions" style="display: flex; gap: 15px; align-items: center; position: relative;">
-            <div class="btn likeBtn ${isLiked ? 'toggled' : ''}" style="padding: 10px 15px; border-radius: 20px; cursor: pointer; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--text-color);">👍 <span class="count">${post.likes||0}</span></div>
+            <!-- Like button removed -->
             <div class="btn loveBtn ${isLoved ? 'toggled' : ''}" style="padding: 10px 15px; border-radius: 20px; cursor: pointer; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--text-color);">❤️ <span class="count">${post.loves||0}</span></div>
             <div class="btn commentToggle" style="padding: 10px 15px; border-radius: 20px; cursor: pointer; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--text-color);">💬 <span class="count">${(post.comments||[]).length}</span></div>
+            
+            <!-- RE-ADDED SHARE BUTTON -->
             <div class="btn shareBtn" style="padding: 10px 15px; border-radius: 20px; cursor: pointer; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--text-color);">🔗 Share</div>
 
-            <div class="share-menu" aria-hidden="true" style="position: absolute; bottom: 45px; right: 0; background: var(--card-glass-bg); backdrop-filter: blur(15px); border: 1px solid var(--card-glass-border); border-radius: 12px; padding: 10px; box-shadow: var(--shadow-deep); display: flex; flex-direction: column; opacity: 0; pointer-events: none; transform: translateY(10px); transition: opacity 0.22s, transform 0.22s; z-index: 1200;">
-                <button class="share-copy" style="background: none; border: none; color: var(--text-color); padding: 8px 12px; text-align: left; border-radius: 8px; transition: background-color 0.2s; cursor: pointer;">📋 Copy Link</button>
-                <button class="share-web" style="background: none; border: none; color: var(--text-color); padding: 8px 12px; text-align: left; border-radius: 8px; transition: background-color 0.2s; cursor: pointer;">🌐 Open Share Dialog</button>
-                <button class="share-whatsapp" style="background: none; border: none; color: var(--text-color); padding: 8px 12px; text-align: left; border-radius: 8px; transition: background-color 0.2s; cursor: pointer;">💬 WhatsApp</button>
-                <button class="share-twitter" style="background: none; border: none; color: var(--text-color); padding: 8px 12px; text-align: left; border-radius: 8px; transition: background-color 0.2s; cursor: pointer;">🐦 X/Twitter</button>
-                <button class="share-fb" style="background: none; border: none; color: var(--text-color); padding: 8px 12px; text-align: left; border-radius: 8px; transition: background-color 0.2s; cursor: pointer;">📘 Facebook</button>
-                <button class="share-mail" style="background: none; border: none; color: var(--text-color); padding: 8px 12px; text-align: left; border-radius: 8px; transition: background-color 0.2s; cursor: pointer;">✉️ Gmail</button>
+            <!-- RE-ADDED SHARE MENU - REMOVED ALL INLINE STYLES -->
+            <div class="share-menu" aria-hidden="true">
+                <button class="share-copy">📋 Copy Link</button>
+                <button class="share-fb">📘 Facebook</button>
+                <button class="share-whatsapp">💬 WhatsApp</button>
+                <button class="share-twitter">🐦 X/Twitter</button>
             </div>
         </div>
     `;
 
-    const likeBtn=el.querySelector('.likeBtn');
+    // const likeBtn=el.querySelector('.likeBtn'); // REMOVED
     const loveBtn=el.querySelector('.loveBtn');
     const commentToggle=el.querySelector('.commentToggle');
-    const shareBtn=el.querySelector('.shareBtn');
-    const shareMenu=el.querySelector('.share-menu');
+    // const shareBtn=el.querySelector('.shareBtn'); // RE-ADDED (but logic is handled by delegation)
+    // const shareMenu=el.querySelector('.share-menu'); // RE-ADDED (but logic is handled by delegation)
     const media=el.querySelector('.media');
-    const thumbOverlay=media.querySelector('.thumb-overlay');
-    const heartOverlay=media.querySelector('.heart-overlay');
+    // const thumbOverlay=media.querySelector('.thumb-overlay'); // REMOVED
+    const heartOverlay=media.querySelector('.heart-animation-overlay'); // UPDATED class
 
     // helper to update UI counts safely
     function updateCountsUI() {
-        likeBtn.querySelector('.count').textContent = post.likes || 0;
+        // likeBtn.querySelector('.count').textContent = post.likes || 0; // REMOVED
         loveBtn.querySelector('.count').textContent = post.loves || 0;
     }
 
     /* ---------------------------
-       Video controls
-       (unchanged logic from earlier, omitted here for brevity)
-       but still present in runtime if post.type === 'video'
+        Video controls
+        (UPDATED)
     ----------------------------*/
     if (post.type === 'video') {
         const video = el.querySelector('video');
         const playPauseBtn = el.querySelector('.play-pause-btn');
         const muteBtn = el.querySelector('.mute-btn');
+        const volumeSlider = el.querySelector('.volume-slider');
         const fullScreenBtn = el.querySelector('.full-screen-btn');
         const timeline = el.querySelector('.timeline-bar');
         const progressFill = el.querySelector('.progress-fill');
@@ -231,12 +246,23 @@ function createPostEl(post){
             }
         };
 
-        [video, playPauseBtn].forEach(elm => elm.addEventListener('click', (e) => {
-            if (e.target !== timeline && !e.target.closest('.controls-bar')) {
-                (video.paused || video.ended) ? video.play() : video.pause();
-                updateControls();
-            }
-        }));
+        // UPDATED: Separated Play/Pause logic
+        // Click on video to play/pause
+        video.addEventListener('click', (e) => {
+            if (e.target.closest('.controls-bar')) return; // Don't play/pause if clicking controls
+            (video.paused || video.ended) ? video.play() : video.pause();
+        });
+        // Click on button to play/pause
+        playPauseBtn.addEventListener('click', () => {
+            (video.paused || video.ended) ? video.play() : video.pause();
+        });
+
+        video.addEventListener('play', updateControls);
+        video.addEventListener('pause', updateControls);
+        video.addEventListener('ended', () => { 
+            video.currentTime = 0; 
+            updateControls(); 
+        });
 
         video.addEventListener('loadedmetadata', () => { durationEl.textContent = formatTime(video.duration); updateControls(); });
         video.addEventListener('timeupdate', () => {
@@ -247,7 +273,7 @@ function createPostEl(post){
                 currentTimeEl.textContent = formatTime(video.currentTime);
             }
         });
-        video.addEventListener('ended', () => { video.currentTime = 0; updateControls(); });
+        // video.addEventListener('ended', ...); // Moved up
 
         const startDrag = (e) => { isDraggingTimeline = true; video.pause(); updateSeek(e); };
         const endDrag = () => { if (isDraggingTimeline) { isDraggingTimeline = false; video.play(); updateControls(); } };
@@ -260,7 +286,31 @@ function createPostEl(post){
         document.addEventListener('touchend', endDrag);
         timeline.addEventListener('click', (e) => { if (e.target.closest('.timeline-thumb')) return; if (!isDraggingTimeline) updateSeek(e); });
 
-        muteBtn.addEventListener('click', () => { video.muted = !video.muted; updateControls(); });
+        // UPDATED: Volume and Mute Listeners
+        muteBtn.addEventListener('click', () => { 
+            video.muted = !video.muted; 
+            if (!video.muted) {
+                video.volume = 0.5; // Unmute to a reasonable volume
+                volumeSlider.value = 0.5;
+            }
+            updateControls(); 
+        });
+
+        volumeSlider.addEventListener('input', (e) => {
+            video.volume = e.target.value;
+            video.muted = e.target.value === "0";
+            updateControls();
+        });
+        
+        video.addEventListener('volumechange', () => {
+            volumeSlider.value = video.volume;
+            if (video.muted || video.volume === 0) {
+                muteBtn.textContent = '🔇';
+            } else {
+                muteBtn.textContent = '🔊';
+            }
+        });
+        
         fullScreenBtn.addEventListener('click', () => {
             const container = el.querySelector('.video-container');
             if (container.requestFullscreen) container.requestFullscreen();
@@ -273,16 +323,8 @@ const imageModal = document.getElementById('imageModal');
 const modalImage = document.getElementById('modalImage');
 const imageModalClose = document.getElementById('imageModalClose');
 
-// When ANY image inside .feed (or .post) is clicked, show the modal
-document.getElementById('feed').addEventListener('click', (e) => {
-  // Use .media img or .carousel-img, adapt selector as needed
-  const img = e.target.closest('img');
-  if (img && img.src) {
-    modalImage.src = img.src;
-    imageModal.classList.add('show');
-    imageModal.style.display = 'flex';
-  }
-});
+// REMOVED: This listener is now inside createPostEl
+// document.getElementById('feed').addEventListener('click', (e) => { ... });
 
 // Close when clicking the close button
 imageModalClose.addEventListener('click', () => {
@@ -309,47 +351,8 @@ document.addEventListener('keydown', (e) => {
 
 let lastOriginRect = null; // store where the image "came from" for close animation
 
-feed.addEventListener('click', (e) => {
-  const img = e.target.closest('img');
-  if (img && img.src) {
-    // Get position and size of the clicked image
-    const imgRect = img.getBoundingClientRect();
-    lastOriginRect = imgRect; // save for closing animation
-
-    // Set modal and modal image to match source initially
-    const modal = document.getElementById('imageModal');
-    const modalImg = document.getElementById('modalImage');
-    modalImg.src = img.src;
-
-    // Hide modal visually so layout doesn't jump, then set it up
-    modal.style.display = "flex";
-    // Allow pre-animation layout flush
-    setTimeout(() => {
-      // Set image position, size to match the small image (absolute, fixed)
-      const vw = window.innerWidth, vh = window.innerHeight;
-      const centerX = (vw / 2) - (imgRect.left + imgRect.width / 2);
-      const centerY = (vh / 2) - (imgRect.top + imgRect.height / 2);
-      const scaleX = imgRect.width / modalImg.offsetWidth;
-      const scaleY = imgRect.height / modalImg.offsetHeight;
-      // Set modal image transform from source position/size
-      modalImg.style.transformOrigin = "center center";
-      modalImg.style.transform =
-        `translate(${centerX}px, ${centerY}px) scale(${scaleX}, ${scaleY})`;
-      modalImg.style.opacity = '0.8';
-      modalImg.classList.remove("modal-image-animate-in", "modal-image-animate-out");
-
-      // force DOM update, then trigger the animation to center/scale
-      void modalImg.offsetWidth;
-      modal.classList.add("show");
-      // Animate to center fullscreen with bounce
-      setTimeout(() => {
-        modalImg.classList.add("modal-image-animate-in");
-        modalImg.style.transform = "";
-        modalImg.style.opacity = "1";
-      }, 10);
-    }, 6);
-  }
-});
+// REMOVED: This listener is now inside createPostEl
+// feed.addEventListener('click', (e) => { ... });
 
 // Close modal with bounce-back to image
 function closeImageModalBounce() {
@@ -394,8 +397,8 @@ document.addEventListener('keydown', (e) => {
 });
 
     /* -------------------------------------------
-       Reaction logic (fixed counting and animations)
-       - uses reactionMap to map arrays -> counters
+        Reaction logic (fixed counting and animations)
+        - uses reactionMap to map arrays -> counters
     -------------------------------------------*/
     function toggleReaction(btn, reactionKey, overlay, reactionLabel) {
         const userId = state.currentUser.id;
@@ -421,29 +424,91 @@ document.addEventListener('keydown', (e) => {
 
             if (overlay) {
                 overlay.classList.add('show');
-                setTimeout(()=> overlay.classList.remove('show'), 700);
+                setTimeout(()=> overlay.classList.remove('show'), 800); // Increased duration for new animation
             }
-            showFeedback(`${reactionLabel} post! ${reactionLabel === 'Liked' ? '👍' : '❤️'}`);
+            showFeedback(`${reactionLabel} post! ${reactionLabel === 'Loved' ? '❤️' : ''}`); // Simplified feedback
         }
         updateCountsUI();
     }
 
-    likeBtn.addEventListener('click', () => toggleReaction(likeBtn, 'likedBy', thumbOverlay, 'Liked'));
+    // likeBtn.addEventListener('click', () => toggleReaction(likeBtn, 'likedBy', thumbOverlay, 'Liked')); // REMOVED
     loveBtn.addEventListener('click', () => toggleReaction(loveBtn, 'lovedBy', heartOverlay, 'Loved'));
 
-    // Double-tap / double-click on media => love animation + toggle love
+    // UPDATED: Combined single/double tap logic
     let lastTap = 0;
-    media.addEventListener('pointerdown', (ev) => {
+    let tapTimer;
+
+    media.addEventListener('pointerdown', (e) => {
         const now = Date.now();
         const dt = now - lastTap;
         lastTap = now;
-        if (dt < 300) {
-            // double tap detected
+
+        clearTimeout(tapTimer); // Cancel any pending single-click
+
+        if (dt < 300 && dt > 0) {
+            // DOUBLE-TAP detected
+            e.preventDefault(); // Prevent text selection, etc.
             toggleReaction(loveBtn, 'lovedBy', heartOverlay, 'Loved');
+            lastTap = 0; // Reset tap-timing
         } else {
-            // single pointerdown: quick visual like pulse (non-persisting)
-            thumbOverlay.classList.add('show');
-            setTimeout(()=>thumbOverlay.classList.remove('show'), 450);
+            // SINGLE-TAP: Set a timer
+            tapTimer = setTimeout(() => {
+                // Timer fired, so it was a single-click
+                // Don't enlarge if it's a video
+                if (post.type === 'video') return; 
+
+                // Find the image element
+                const img = media.querySelector('img');
+                if (img && img.src) {
+                    // --- Start of Enlarge Logic ---
+                    const imgRect = img.getBoundingClientRect();
+                    lastOriginRect = imgRect; // save for closing animation
+
+                    const modal = document.getElementById('imageModal');
+                    const modalImg = document.getElementById('modalImage');
+                    
+                    // Set src *before* measuring
+                    modalImg.src = img.src;
+
+                    // Force modal to be visible but off-screen to get width/height
+                    modal.style.visibility = 'hidden';
+                    modal.style.display = 'flex';
+                    
+                    const modalImgWidth = modalImg.offsetWidth;
+                    const modalImgHeight = modalImg.offsetHeight;
+
+                    // Hide it again before animation
+                    modal.style.visibility = 'visible';
+                    modal.style.display = 'none'; // Will be set to flex by timeout
+
+                    setTimeout(() => {
+                        modal.style.display = "flex";
+                        
+                        const vw = window.innerWidth, vh = window.innerHeight;
+                        const centerX = (vw / 2) - (imgRect.left + imgRect.width / 2);
+                        const centerY = (vh / 2) - (imgRect.top + imgRect.height / 2);
+                        
+                        // Fallback if width/height is 0
+                        const scaleX = modalImgWidth ? (imgRect.width / modalImgWidth) : 1;
+                        const scaleY = modalImgHeight ? (imgRect.height / modalImgHeight) : 1;
+                        
+                        modalImg.style.transformOrigin = "center center";
+                        modalImg.style.transform =
+                            `translate(${centerX}px, ${centerY}px) scale(${scaleX}, ${scaleY})`;
+                        modalImg.style.opacity = '0.8';
+                        modalImg.classList.remove("modal-image-animate-in", "modal-image-animate-out");
+
+                        void modalImg.offsetWidth;
+                        modal.classList.add("show");
+                        setTimeout(() => {
+                            modalImg.classList.add("modal-image-animate-in");
+                            modalImg.style.transform = "";
+                            modalImg.style.opacity = "1";
+                        }, 10);
+                    }, 6);
+                    // --- End of Enlarge Logic ---
+                }
+            }, 300); // Wait 300ms to see if it's a double-tap
         }
     });
 
@@ -455,80 +520,8 @@ document.addEventListener('keydown', (e) => {
         });
     });
 
-    // Share menu toggle and share handlers
-    shareBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        document.querySelectorAll('.share-menu.show').forEach(m => m.classList.remove('show'));
-        if (shareMenu.classList.contains('show')) {
-            shareMenu.classList.remove('show');
-            shareMenu.setAttribute('aria-hidden','true');
-        } else {
-            shareMenu.classList.add('show');
-            shareMenu.setAttribute('aria-hidden','false');
-        }
-    });
-
-    // close menus on click outside
-    document.addEventListener('click', () => {
-        document.querySelectorAll('.share-menu.show').forEach(m => m.classList.remove('show'));
-    });
-    shareMenu.addEventListener('click', (e) => e.stopPropagation());
-
-    // Build a canonical post url (in demo we use a placeholder)
-    const postUrl = `https://epicscholar.com/post/${post.id}`;
-    shareMenu.querySelector('.share-copy').addEventListener('click', (e) => {
-        e.stopPropagation();
-        navigator.clipboard?.writeText(postUrl).then(()=> showFeedback('Link copied! 📋')).catch(()=> showFeedback('Copy failed.'));
-        shareMenu.classList.remove('show');
-    });
-
-    // Attempt to use native share if available
-    shareMenu.querySelector('.share-web').addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (navigator.share) {
-            navigator.share({ title: post.caption.slice(0,100), text: post.caption, url: postUrl })
-                .then(()=> showFeedback('Shared via system dialog'))
-                .catch(()=> showFeedback('Share canceled'));
-        } else {
-            showFeedback('Share dialog not available on this browser');
-        }
-        shareMenu.classList.remove('show');
-    });
-
-    // WhatsApp share
-    shareMenu.querySelector('.share-whatsapp').addEventListener('click', (e) => {
-        e.stopPropagation();
-        const url = `https://wa.me/?text=${encodeURIComponent(post.caption + '\n' + postUrl)}`;
-        window.open(url, '_blank');
-        shareMenu.classList.remove('show');
-    });
-
-    // X / Twitter share (opens compose)
-    shareMenu.querySelector('.share-twitter').addEventListener('click', (e) => {
-        e.stopPropagation();
-        const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(post.caption)}&url=${encodeURIComponent(postUrl)}`;
-        window.open(url, '_blank');
-        shareMenu.classList.remove('show');
-    });
-
-    // Facebook share
-    shareMenu.querySelector('.share-fb').addEventListener('click', (e) => {
-        e.stopPropagation();
-        const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}&quote=${encodeURIComponent(post.caption)}`;
-        window.open(url, '_blank');
-        shareMenu.classList.remove('show');
-    });
-
-    // Gmail / Mail share fallback
-    shareMenu.querySelector('.share-mail').addEventListener('click', (e) => {
-        e.stopPropagation();
-        const subject = encodeURIComponent('Check out this Epic on EpicScholar');
-        const body = encodeURIComponent(`${post.caption}\n\n${postUrl}`);
-        const mailto = `mailto:?subject=${subject}&body=${body}`;
-        window.open(mailto, '_blank');
-        shareMenu.classList.remove('show');
-    });
-
+    // Share logic is now handled by the IIFE at the bottom
+    
     return el;
 }
 
@@ -546,7 +539,7 @@ function renderFeed(postsToRender = state.posts) {
 renderFeed();
 
 /* -------------------------------------------
-   COMMENT MODAL LOGIC (with right/left alignment)
+    COMMENT MODAL LOGIC (with right/left alignment)
 -------------------------------------------*/
 const commentModal = document.getElementById('commentModal');
 const commentModalList = document.getElementById('commentModalList');
@@ -622,7 +615,7 @@ document.addEventListener('keydown', (e) => {
 });
 
 /* -------------------------------------------
-   RIGHT PANEL: improved responsiveness & faster hover/click
+    RIGHT PANEL: improved responsiveness & faster hover/click
 -------------------------------------------*/
 ['closeReminder', 'closeNotifs', 'closeSchedule', 'closeTests', 'cancelUpload'].forEach(id => {
     const el = document.getElementById(id);
@@ -660,7 +653,7 @@ miniCards.forEach(el => {
 });
 
 /* -------------------------------------------
-   UPLOAD HANDLING & DATA INIT
+    UPLOAD HANDLING & DATA INIT
 ------------------------------------------- */
 const epicFileInput=document.getElementById('epicFileInput');
 const epicPreview=document.getElementById('epicPreview');
@@ -723,12 +716,12 @@ document.getElementById('confirmUpload').addEventListener('click',()=>{
 
 /* Init right-panel lists */
 document.getElementById('remindersList').innerHTML='<li style="color: var(--primary-color)">Math (Algebra) - Due Today</li><li>English Essay - Draft 1 Review</li><li>Science Lab Prep - Tomorrow</li>';
-document.getElementById('notifList').innerHTML='<li style="color: var(--primary-color)">New message from Prof. X</li><li>Your post received 5 likes!</li><li>Reminder: EduBot available for tutoring.</li>';
+document.getElementById('notifList').innerHTML='<li style="color: var(--primary-color)">New message from Prof. X</li><li>Your post received 5 loves!</li><li>Reminder: EduBot available for tutoring.</li>';
 document.getElementById('schedulesList').innerHTML='<li style="color: var(--primary-color)">10:00 AM - Group Study Session</li><li>1:00 PM - Math Class</li><li>3:00 PM - Library Research</li>';
 document.getElementById('testsList').innerHTML='<li style="color: #ff416c; font-weight: bold;">Chemistry Test: Oct 30</li><li>Physics Quiz: Nov 5</li><li>History Midterm: Nov 15</li>';
 
 /* -------------------------------------------
-   SEARCH / NAV (small polish)
+    SEARCH / NAV (small polish)
 -------------------------------------------*/
 const searchBar = document.getElementById('searchBar');
 searchBar.addEventListener('input', (e) => {
@@ -754,14 +747,20 @@ function updateUnderline(el){
 }
 
 allNavItems.forEach(it=>{
-    it.addEventListener('mouseenter', ()=>{ /* no underline movement */ });
-    it.addEventListener('click', ()=>{
+    it.addEventListener('mouseenter', ()=>{ /* no underline movement */ });
+    it.addEventListener('click', (e)=>{
+        // Prevent default navigation for SPA
+        e.preventDefault(); 
+        
         // Get the view name from the data-view attribute (e.g., "home", "messages")
         const viewName = it.dataset.view;
         
-        // Navigate the browser to the new .html page
-        window.location.href = `${viewName}.html`;
-    });
+        // Use the SPA view switching function
+        switchView(viewName);
+        
+        // Update the underline to the clicked item
+        // updateUnderline(it); // This is still disabled as per original code
+    });
 });
 
 navWrap.addEventListener('mouseleave', () => { /* no op - underline removed */ });
@@ -771,6 +770,11 @@ window.addEventListener('resize', ()=>{ /* no-op since no underline */ });
 document.addEventListener('DOMContentLoaded', () => {
     // initial micro polish: pre-warm the feed to avoid layout jank
     renderFeed();
+    // Set active nav based on initial state
+    const activeNav = document.querySelector(`.nav-item[data-view="${state.activeView}"]`);
+    if(activeNav) {
+        // updateUnderline(activeNav); // Disabled
+    }
 });
 
 document.getElementById('themeToggle').addEventListener('change', toggleTheme);
@@ -801,7 +805,11 @@ document.getElementById('themeToggle').addEventListener('change', toggleTheme);
     });
   }
 
-  /* TIGHTEN SHARE MENU BEHAVIOR (prevent immediate close on toggle) */
+  /* -------------------------------------------
+      RE-ADDED: SHARE MENU LOGIC (Event Delegation)
+  ------------------------------------------- */
+  
+  // Close all menus when clicking anywhere
   document.addEventListener('click', () => {
     document.querySelectorAll('.share-menu.show').forEach(m => {
       m.classList.remove('show');
@@ -809,53 +817,79 @@ document.getElementById('themeToggle').addEventListener('change', toggleTheme);
     });
   });
 
-  // delegate share toggle inside posts (safer than per-post closures)
+  // delegate share toggle inside posts
   document.addEventListener('click', (e) => {
     const shareBtn = e.target.closest('.shareBtn');
-    if (!shareBtn) return;
-    e.stopPropagation();
+    if (!shareBtn) return; // Didn't click a share button
+    e.stopPropagation(); // Stop the click from bubbling to the document listener above
+    
     const postRoot = shareBtn.closest('article');
     if (!postRoot) return;
     const menu = postRoot.querySelector('.share-menu');
     if (!menu) return;
-    // close other menus first
+
+    const isAlreadyShown = menu.classList.contains('show');
+
+    // Close *other* menus first
     document.querySelectorAll('.share-menu.show').forEach(m => {
-      if (m !== menu) { m.classList.remove('show'); m.setAttribute('aria-hidden','true'); }
+      if (m !== menu) { 
+        m.classList.remove('show'); 
+        m.setAttribute('aria-hidden','true'); 
+      }
     });
-    // toggle current
-    const isShown = menu.classList.toggle('show');
-    menu.setAttribute('aria-hidden', isShown ? 'false' : 'true');
+    
+    // Toggle *this* menu
+    if (!isAlreadyShown) {
+        menu.classList.add('show');
+        menu.setAttribute('aria-hidden', 'false');
+    } else {
+        menu.classList.remove('show');
+        menu.setAttribute('aria-hidden', 'true');
+    }
   });
 
-  // share action handlers: use event delegation for buttons inside menu
+  // Share action handlers: use event delegation for buttons inside menu
   document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.share-copy, .share-web, .share-whatsapp, .share-twitter, .share-fb, .share-mail');
+    // Look for a click on any button inside a share menu
+    const btn = e.target.closest('.share-menu button');
     if (!btn) return;
-    e.stopPropagation();
+    e.stopPropagation(); // Stop click from closing the menu immediately
+    
     const menu = btn.closest('.share-menu');
     const post = btn.closest('article');
     const postId = post?.dataset?.id || ('post-' + Date.now());
     const postUrl = `https://epicscholar.com/post/${postId}`;
+    const postCaption = post?.querySelector('.text-wrapping')?.textContent || 'Check out this post!';
+
     if (btn.classList.contains('share-copy')) {
-      navigator.clipboard?.writeText(postUrl).then(()=>showFeedback('Link copied! 📋')).catch(()=>showFeedback('Copy failed.'));
-    } else if (btn.classList.contains('share-web')) {
-      if (navigator.share) {
-        navigator.share({ title: post?.querySelector('.text-wrapping')?.textContent?.slice(0,120) || 'Epic', text: post?.querySelector('.text-wrapping')?.textContent || '', url: postUrl })
-          .then(()=>showFeedback('Shared via system dialog')).catch(()=>showFeedback('Share canceled'));
-      } else {
-        showFeedback('Native share not available');
+      // Use execCommand as a fallback for iframe environments
+      try {
+        const tempInput = document.createElement('textarea');
+        tempInput.value = postUrl;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        showFeedback('Link copied! 📋');
+      } catch (err) {
+        showFeedback('Copy failed.');
       }
-    } else if (btn.classList.contains('share-whatsapp')) {
-      window.open(`https://wa.me/?text=${encodeURIComponent((post?.querySelector('.text-wrapping')?.textContent||'') + '\n' + postUrl)}`, '_blank');
-    } else if (btn.classList.contains('share-twitter')) {
-      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(post?.querySelector('.text-wrapping')?.textContent||'')}&url=${encodeURIComponent(postUrl)}`, '_blank');
     } else if (btn.classList.contains('share-fb')) {
-      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}`, '_blank');
-    } else if (btn.classList.contains('share-mail')) {
-      window.open(`mailto:?subject=${encodeURIComponent('Check this Epic')}&body=${encodeURIComponent((post?.querySelector('.text-wrapping')?.textContent||'') + '\n\n' + postUrl)}`, '_blank');
+        const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}&quote=${encodeURIComponent(postCaption)}`;
+        window.open(url, '_blank');
+    } else if (btn.classList.contains('share-whatsapp')) {
+        const url = `https://wa.me/?text=${encodeURIComponent(postCaption + '\n' + postUrl)}`;
+        window.open(url, '_blank');
+    } else if (btn.classList.contains('share-twitter')) {
+        const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(postCaption)}&url=${encodeURIComponent(postUrl)}`;
+        window.open(url, '_blank');
     }
-    // close menu
-    if (menu) { menu.classList.remove('show'); menu.setAttribute('aria-hidden', 'true'); }
+    
+    // Close the menu after action
+    if (menu) { 
+      menu.classList.remove('show'); 
+      menu.setAttribute('aria-hidden', 'true'); 
+    }
   });
 
 })();
