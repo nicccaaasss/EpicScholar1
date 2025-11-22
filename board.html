@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CHESS - Game</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <link rel="stylesheet" href="board.css">
+</head>
+<body>
+    <div class="background-animation"></div>
+
+    <div class="game-container">
+        <header class="game-header hover-pop">
+            <h2 class="mini-logo">CHESS</h2>
+            <div class="header-controls">
+                <button class="btn guide-btn" onclick="toggleGuide()">
+                    <i class="fas fa-question-circle"></i> Guide
+                </button>
+                <button class="btn exit-btn" onclick="exitGame()">
+                    Exit
+                </button>
+            </div>
+        </header>
+
+        <div class="board-layout">
+            <!-- Black Panel -->
+            <aside class="player-panel black hover-pop">
+                <div class="panel-header">
+                    <h3>Black (AI)</h3>
+                    <div class="timer black-timer">--:--</div>
+                </div>
+                <div class="captured-pieces black-caps"></div>
+            </aside>
+
+            <!-- Board -->
+            <main class="main-board-area">
+                <div class="controls-bar">
+                    <button class="btn" onclick="flipBoard()"><i class="fas fa-retweet"></i> Flip Board</button>
+                </div>
+
+                <div id="chess-board" class="board-theme-classic hover-pop"></div>
+
+                <div id="thinking" class="thinking hover-pop">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                    <span>AI is thinking...</span>
+                </div>
+            </main>
+
+            <!-- White Panel -->
+            <aside class="player-panel white hover-pop">
+                <div class="panel-header">
+                    <h3>White (You)</h3>
+                    <div class="timer white-timer">--:--</div>
+                </div>
+                <div class="captured-pieces white-caps"></div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Guide Modal -->
+    <div id="guide-modal" class="modal hidden">
+        <div class="modal-content hover-pop">
+            <span class="close-modal" onclick="toggleGuide()">&times;</span>
+            <h2>How to Play Chess</h2>
+            <ul>
+                <li><strong>Win:</strong> Checkmate the opponent's King.</li>
+                <li><strong>Move:</strong> Click a piece to select, then click a destination.</li>
+                <li><strong>Pawn:</strong> Forward 1 (or 2 first move), capture diagonal.</li>
+                <li><strong>Knight:</strong> L-shape jump.</li>
+                <li><strong>Bishop:</strong> Diagonals.</li>
+                <li><strong>Rook:</strong> Straight lines.</li>
+                <li><strong>Queen:</strong> Any direction.</li>
+                <li><strong>King:</strong> 1 square any direction.</li>
+            </ul>
+            <button class="btn" onclick="toggleGuide()" style="width:100%; margin-top:15px;">Got it!</button>
+        </div>
+    </div>
+
+    <script src="board.js"></script>
+</body>
+</html>
